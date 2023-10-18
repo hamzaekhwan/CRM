@@ -102,7 +102,8 @@ def admin(request,pk=None):
             return Response(serializer.data)
         
     if request.method=="DELETE":  
-        User.objects.filter(id=pk).delete()
+        user_obj = get_object_or_404(User, id=pk)
+        user_obj.delete()
         message = {'detail': 'Admin deleted successfully'}
         return Response(message)
     

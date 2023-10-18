@@ -17,14 +17,14 @@ class ClientListView(generics.ListAPIView):
 
     filterset_fields = [
                         'city',
-                        'ats'
+                    
                         ]
     
     search_fields = ['name',
                      'arabic_name',
                      'city',
                      'mobile_phone',
-                     'ats',
+                
                      ]
     
     def get(self, request, *args, **kwargs):

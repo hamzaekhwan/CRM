@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import os 
 from datetime import timedelta
+from CRMapp.variables import JAZZMIN_SETTINGS,JAZZMIN_UI_TWEAKS
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-6$l^7##j5gp++yn30o8tj1kioda+_8aye5*qsk)fla^y)xf7n*
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -35,6 +36,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 
 INSTALLED_APPS = [
     'CRMapp',
+    'jazzmin',
     'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -48,6 +50,12 @@ INSTALLED_APPS = [
     'corsheaders',
    
 ]
+
+
+
+JAZZMIN_SETTINGS=JAZZMIN_SETTINGS
+
+JAZZMIN_UI_TWEAKS=JAZZMIN_UI_TWEAKS
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -201,6 +209,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
+
+STATIC_ROOT='/home/hamzaekhwan/CRM/static'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

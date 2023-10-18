@@ -15,8 +15,8 @@ def client(request,pk=None):
         data=request.data
 
         name=data['name']
-        ats=data['ats']
-        client_exists = Client.objects.filter(name=name).exists() or Client.objects.filter(ats=ats).exists()
+        
+        client_exists = Client.objects.filter(name=name).exists() 
         if not client_exists:
             
             mobile_phone=data['mobile_phone']
@@ -24,7 +24,7 @@ def client(request,pk=None):
             city=data['city']
 
             Client.objects.create(name=name,
-                                ats=ats,
+                             
                                 mobile_phone=mobile_phone,
                                 arabic_name=arabic_name,
                                 city=city)
@@ -47,8 +47,8 @@ def client(request,pk=None):
             return JsonResponse(serializer.data,safe=False)
     
     if request.method == 'DELETE' :
-       
-        Client.objects.filter(id=pk).delete()
+        client=get_object_or_404(Client, id=pk)
+        client.delete()
         message = {'detail': 'client deleted successfully'}
         return Response(message) 
     
@@ -58,13 +58,13 @@ def client(request,pk=None):
 
 
         name = data.get('name', client.name)
-        ats = data.get('ats', client.ats)
+      
         mobile_phone = data.get('mobile_phone', client.mobile_phone)
         arabic_name = data.get('arabic_name', client.arabic_name)
         city = data.get('city', client.city)
 
         client.name = name
-        client.ats = ats
+        
         client.mobile_phone = mobile_phone
         client.arabic_name = arabic_name
         client.city = city

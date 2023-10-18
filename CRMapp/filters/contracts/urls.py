@@ -7,7 +7,7 @@ from django.urls import include, path
 
 
 urlpatterns = [
-path('list', views.ElevatorContracListView.as_view(),
+path('list', views.ContractListView.as_view(),
          name='search'),
 
          

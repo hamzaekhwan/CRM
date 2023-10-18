@@ -1,14 +1,13 @@
 from django.dispatch import receiver
-
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
+from .models import *
 
 
 
 @receiver(reset_password_token_created)
-
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
 
     context = {
@@ -35,3 +34,4 @@ def password_reset_token_created(sender, instance, reset_password_token, *args, 
     )
     msg.attach_alternative(email_html_message, "text/html")
     msg.send()
+ 

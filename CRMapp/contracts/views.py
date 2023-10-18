@@ -17,63 +17,46 @@ def contract(request,pk=None):
 
         
 
-        maintenance_contract_number=data['maintenance_contract_number']
+        ats=data['ats']
 
-        contract_exists = ElevatorContract.objects.filter(maintenance_contract_number=maintenance_contract_number).exists()
+        contract_exists = Contract.objects.filter(ats=ats).exists()
         if not contract_exists:
             client_id=data['client_id']
             client=Client.objects.get(id=client_id)
 
-            maintenance_contract_start_date=data['maintenance_contract_start_date']
+            
+           
 
-            maintenance_contract_end_date=data['maintenance_contract_end_date']
+            
 
-            type_maintenance=data['type_maintenance']
+          
 
-            contract_value=data['contract_value']
+           
 
-            spare_parts=data['spare_parts']
-
-            type=data['type']
+            lift_type=data['lift_type']
 
             size=data['size']
 
             floors=data['floors']
 
-            brand=data['brand']
+       
 
-            number_of_visits_per_year=data['number_of_visits_per_year']
-
-            villa_no=data['villa_no']
 
             location=data['location']
 
-            handing_over_date=data['handing_over_date']
+           
 
-            free_maintenance_expiry_date=data['free_maintenance_expiry_date']
+            
 
-            new_conrtract=ElevatorContract.objects.create(client=client,
-                                        maintenance_contract_number=maintenance_contract_number,
-                                        maintenance_contract_start_date=maintenance_contract_start_date,
-                                        maintenance_contract_end_date=maintenance_contract_end_date,
-                                        type_maintenance=type_maintenance,
-                                        contract_value=contract_value,
-                                        spare_parts=spare_parts,
-                                        type=type,
+            new_conrtract=Contract.objects.create(
+                                        ats=ats,
+                                        client=client,
+                                        lift_type=lift_type,
                                         size=size,
                                         floors=floors,
-                                        brand=brand,
-                                        number_of_visits_per_year=number_of_visits_per_year,
-                                        villa_no=villa_no,
-                                        location=location,
-                                        handing_over_date=handing_over_date,
-                                        free_maintenance_expiry_date=free_maintenance_expiry_date)
+                                        location=location )
             
-            Phase.objects.create(client=client,
-                                 contract=new_conrtract,
-                                 Name='INQUIRY',
-                                 isActive=True,
-                                 start_date=maintenance_contract_start_date)
+           
             
             message = {'detail': 'Contract added successfully'}
             return Response(message)
@@ -87,41 +70,32 @@ def contract(request,pk=None):
     if request.method == 'GET' :
         if pk is not None:
           
-            user = get_object_or_404(ElevatorContract, id=pk)
-            serializer = ElevatorContractSerializer(user)
+            user = get_object_or_404(Contract, id=pk)
+            serializer = Contract(user)
             return Response(serializer.data)
         else:
-            query=ElevatorContract.objects.all()
+            query=Contract.objects.all()
 
-            serializer=ElevatorContractSerializer(query,many=True)
+            serializer=Contract(query,many=True)
             return Response(serializer.data)
     
     if request.method == 'DELETE' :
         
-
-        ElevatorContract.objects.filter(id=pk).delete()
+        contract = get_object_or_404(Contract, id=pk)
+        contract.delete()
+      
         message = {'detail': 'Admin deleted successfully'}
         return Response(message)
     
     if request.method == 'PUT' :
-        contract = get_object_or_404(ElevatorContract, id=pk)
+        contract = get_object_or_404(Contract, id=pk)
         data = request.data
         
-        contract.maintenance_contract_number = data.get('maintenance_contract_number', contract.maintenance_contract_number)
-        contract.maintenance_contract_start_date = data.get('maintenance_contract_start_date', contract.maintenance_contract_start_date)
-        contract.maintenance_contract_end_date = data.get('maintenance_contract_end_date', contract.maintenance_contract_end_date)
-        contract.type_maintenance = data.get('type_maintenance', contract.type_maintenance)
-        contract.contract_value = data.get('contract_value', contract.contract_value)
-        contract.spare_parts = data.get('spare_parts', contract.spare_parts)
-        contract.type = data.get('type', contract.type)
+        contract.ats=data.get('ats', contract.ats)
+        contract.lift_type=data.get('lift_type', contract.lift_type)
         contract.size = data.get('size', contract.size)
         contract.floors = data.get('floors', contract.floors)
-        contract.brand = data.get('brand', contract.brand)
-        contract.number_of_visits_per_year = data.get('number_of_visits_per_year', contract.number_of_visits_per_year)
-        contract.villa_no = data.get('villa_no', contract.villa_no)
         contract.location = data.get('location', contract.location)
-        contract.handing_over_date = data.get('handing_over_date', contract.handing_over_date)
-        contract.free_maintenance_expiry_date = data.get('free_maintenance_expiry_date', contract.free_maintenance_expiry_date)
 
         contract.save()
 
@@ -129,13 +103,11 @@ def contract(request,pk=None):
         return Response(message, status=status.HTTP_200_OK)
         
 
-
-
 @api_view(['GET'])
 @permission_classes([IsAdminUser])
 def contract_phases_by_id(request,pk):
 
-    contract_obj=ElevatorContract.objects.get(id=pk)
+    contract_obj=Contract.objects.get(id=pk)
 
     query=Phase.objects.filter(contract=contract_obj)
     serializer=PhaseSerializer(query,many=True)
@@ -149,8 +121,8 @@ def note(request,pk=None):
     if request.method == 'POST' :
         data=request.data
         
-        contract_id=data['contract_id']
-        contract=ElevatorContract.objects.get(id=contract_id)
+        
+        contract=Contract.objects.get(id=pk)
 
         note=data['note']
         date=data['date']
@@ -179,7 +151,7 @@ def note(request,pk=None):
         note_obj.note = data.get('note', note_obj.note)
         note_obj.date = data.get('date', note_obj.date)
         
-        # التحقق من وجود مرفق (attachment)
+        
         attachment = request.FILES.get('attachment', None)
         if attachment is not None:
             note_obj.attachment = attachment
@@ -207,9 +179,7 @@ def note(request,pk=None):
 def phase(request,pk=None):
     if request.method == 'POST' :
         data=request.data
-    
-        contract_id=data['contract_id']
-        contract_obj=ElevatorContract.objects.get(id=contract_id)
+        contract_obj=Contract.objects.get(id=pk)
 
         start_date_new_phase=data['start_date']
         name=data['name']
@@ -238,8 +208,8 @@ def phase(request,pk=None):
         return Response(message, status=status.HTTP_200_OK)
     
     if request.method == 'DELETE' :
-        
-        Phase.objects.delete(id=pk)
+        phase=get_object_or_404(Phase, id=pk)
+        phase.delete()
         message = {'detail': 'Phase deleted successfully'}
         return Response(message)
 
@@ -252,6 +222,7 @@ def phase(request,pk=None):
             phases = Phase.objects.all()
             serializer = PhaseSerializer(phases, many=True)
             return Response(serializer.data)
+
 @api_view(['PUT'])
 @permission_classes([IsAdminUser])
 def end_phase(request,pk):

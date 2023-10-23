@@ -12,11 +12,19 @@ class Client(models.Model):
     mobile_phone=models.CharField(validators=[phone_regex], max_length=17)
     arabic_name=models.CharField("Arabic Name of Client", max_length=64)
     city=models.CharField("city", max_length=64)
+    inquiry=models.BooleanField("INQUIRY",default=True)
+    date=models.DateTimeField("Date of client register",blank=True,null=True)
     
     def __str__(self):
         return str(self.name ) 
 
+class Reminder(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255)
+    reminder_datetime = models.DateTimeField()
+    notification_sent = models.BooleanField(default=False)  
 
+    
 class Contract(models.Model):
     client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
     ats=models.CharField("ATS", max_length=64)
@@ -56,7 +64,7 @@ class MaintenanceLift(models.Model):
         return str(self.maintenance_contract_number ) 
 
 PHASES_NAME=(
-    ('INQUIRY', 'INQUIRY'),
+    
     ('SALES', 'SALES'),
     ('ENG', 'ENG'),
     ('SIGNED_CONTRACT', 'SIGNED_CONTRACT'),

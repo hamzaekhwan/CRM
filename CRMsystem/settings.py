@@ -37,6 +37,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 INSTALLED_APPS = [
     'CRMapp',
     'jazzmin',
+    
     'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -179,6 +180,15 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],   # Change localhost to the ip in which you have redis server running on.
+        },
+    },
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
@@ -193,7 +203,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-
+ASGI_APPLICATION = "CRMsystem.asgi.application"
 
 
 EMAIL_HOST = 'smtp.gmail.com'

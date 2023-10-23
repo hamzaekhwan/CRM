@@ -34,8 +34,7 @@ def move_to_specific_phase(contract,start_date, new_phase_name):
     # التحقق مما إذا كان اسم المرحلة المُدخل موجود ضمن الـ PHASES_NAME
     if new_phase_name not in [choice[1] for choice in PHASES_NAME]:
         return None  
-    if Phase.objects.filter(contract=contract).count()==0:
-        return None
+   
     
     current_phase = Phase.objects.filter(contract=contract, isActive=True).first()
 

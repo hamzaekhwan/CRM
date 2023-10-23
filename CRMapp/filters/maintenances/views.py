@@ -19,8 +19,8 @@ class MaintenanceListView(generics.ListAPIView):
     search_fields = ['client__name',
                      'client__arabic_name',
                      'client__city',
-                     'contract__maintenance_contract_number',
-                     'contract__villa_no',
+                     
+                 
                      'date']
  
     

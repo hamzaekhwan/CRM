@@ -15,10 +15,7 @@ class ClientListView(generics.ListAPIView):
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
-    filterset_fields = [
-                        'city',
-                    
-                        ]
+    filterset_fields = ['city','inquiry']
     
     search_fields = ['name',
                      'arabic_name',

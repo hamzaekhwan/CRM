@@ -23,7 +23,9 @@ class ContractListView(generics.ListAPIView):
     search_fields = ['client__name',
                      'client__arabic_name',
                      'client__city',
-                     'ats']
+                     'client__mobile_phone'
+                     'ats',
+                     'location',]
     
     def get(self, request, *args, **kwargs):
 

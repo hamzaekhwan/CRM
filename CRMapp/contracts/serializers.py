@@ -53,11 +53,9 @@ class ContractSerializer(serializers.ModelSerializer):
         return serializer.data
     
     def get_current_phase(self, obj):
-        contract=Contract.objects.get(id=obj.id)
-        current_phase=Phase.objects.filter(client=obj.client,contract=contract,isActive=True).first()
-        serializer=PhaseSerializer(current_phase,many=False)
-        return serializer.data
-            
+        contract=Contract.objects.filter(id=obj.id).first()
+        current_phase=Phase.objects.filter(client=obj.client,contract=contract,isActive=True)
+        return current_phase.first().Name
 
 
 

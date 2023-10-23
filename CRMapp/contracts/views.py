@@ -71,12 +71,12 @@ def contract(request,pk=None):
         if pk is not None:
           
             user = get_object_or_404(Contract, id=pk)
-            serializer = Contract(user)
+            serializer = ContractSerializer(user)
             return Response(serializer.data)
         else:
             query=Contract.objects.all()
 
-            serializer=Contract(query,many=True)
+            serializer=ContractSerializer(query,many=True)
             return Response(serializer.data)
     
     if request.method == 'DELETE' :
@@ -122,7 +122,7 @@ def note(request,pk=None):
         data=request.data
         
         
-        contract=Contract.objects.get(id=pk)
+        contract = get_object_or_404(Contract, id=pk)
 
         note=data['note']
         date=data['date']
@@ -140,9 +140,10 @@ def note(request,pk=None):
         message = {'detail': 'Note added successfully'}
         return Response(message)
     if request.method == 'DELETE' :
-        Note.objects.filter(id=pk).delete()
+        query=get_object_or_404(Note, id=pk)
+        query.delete()
         message = {'detail': 'Note deleted successfully'}
-        return Response(message)
+        return Response(message) 
     if request.method == 'PUT' :
         note_obj = get_object_or_404(Note, id=pk)
         data = request.data
@@ -179,9 +180,9 @@ def note(request,pk=None):
 def phase(request,pk=None):
     if request.method == 'POST' :
         data=request.data
-        contract_obj=Contract.objects.get(id=pk)
-
-        start_date_new_phase=data['start_date']
+        contract_obj = get_object_or_404(Contract, id=pk)
+      
+        start_date_new_phase=data['start_date'] 
         name=data['name']
 
         new_phase = move_to_specific_phase(contract_obj,start_date_new_phase,name)

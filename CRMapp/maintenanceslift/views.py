@@ -13,7 +13,7 @@ def maintenancelift(request,pk=None):
         data=request.data
         
         
-        contract=Contract.objects.get(id=pk)
+        contract = get_object_or_404(Contract, id=pk)
         maintenance_contract_number=data['maintenance_contract_number']
         maintenance_contract_start_date=data['maintenance_contract_start_date']
         maintenance_contract_end_date=data['maintenance_contract_end_date']
@@ -24,12 +24,12 @@ def maintenancelift(request,pk=None):
         brand=data['brand']
       
         villa_no=data['villa_no']
-        handing_over_date=data['number_of_visits_handing_over_dateper_year']
+        handing_over_date=data['handing_over_date']
         number_of_visits_per_year=data['number_of_visits_per_year']
         free_maintenance_expiry_date=data['free_maintenance_expiry_date']
 
         MaintenanceLift.objects.create(contract=contract,
-                                        client=contract.client,
+                                       
                                         maintenance_contract_number=maintenance_contract_number,
                                         maintenance_contract_start_date=maintenance_contract_start_date,
                                         maintenance_contract_end_date=maintenance_contract_end_date,
@@ -46,9 +46,10 @@ def maintenancelift(request,pk=None):
         message = {'detail': 'MaintenancesLift added successfully'}
         return Response(message)
     if request.method == 'DELETE' :
-        MaintenanceLift.objects.filter(id=pk).delete()
-        message = {'detail': 'MaintenancesLift deleted successfully'}
-        return Response(message)
+        query=get_object_or_404(MaintenanceLift, id=pk)
+        query.delete()
+        message = {'detail': 'MaintenanceLift deleted successfully'}
+        return Response(message) 
     if request.method == 'PUT' :
         maint_obj = get_object_or_404(MaintenanceLift, id=pk)
         data = request.data

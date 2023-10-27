@@ -3,8 +3,7 @@
 
 from django.db import models
 from .validators import phone_regex
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
+
 
 class Client(models.Model):
     name=models.CharField("Name of Client", max_length=64)

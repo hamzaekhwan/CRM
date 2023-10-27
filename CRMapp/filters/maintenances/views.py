@@ -16,11 +16,9 @@ class MaintenanceListView(generics.ListAPIView):
 
     filterset_fields = ['type_name']
     
-    search_fields = ['client__name',
-                     'client__arabic_name',
-                     'client__city',
-                     
-                 
+    search_fields = ['contract__interest__client__name',
+                     'contract__interest__client__arabic_name',
+                     'contract__interest__client__city',
                      'date']
  
     

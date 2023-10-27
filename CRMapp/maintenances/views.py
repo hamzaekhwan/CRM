@@ -14,7 +14,7 @@ def maintenance(request,pk=None):
  
     if request.method == 'POST' :
         contract = get_object_or_404(Contract, id=pk)
-        client=contract.client
+      
         data=request.data
        
         data = request.data
@@ -26,7 +26,7 @@ def maintenance(request,pk=None):
         signature_of_technician=request.FILES.get('signature_of_technician')
 
         maintenance=Maintenance.objects.create(contract=contract,
-                                    client=client,
+                             
                                     type_name=type_name,
                                     remarks=remarks,
                                     date=date,

@@ -2,9 +2,9 @@
 
 
 from django.db import models
-
 from .validators import phone_regex
-
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 class Client(models.Model):
     name=models.CharField("Name of Client", max_length=64)
@@ -18,6 +18,22 @@ class Client(models.Model):
     def __str__(self):
         return str(self.name ) 
 
+
+COMPANY_NAME=(
+    ('ATLAS', 'ATLAS'),
+    ('KEILANI_INTERIORS', 'KEILANI_INTERIORS'),
+    ('NAMMOUS', 'NAMMOUS'),
+    ('KCC', 'KCC'),
+    ('SMART', 'SMART'),
+    ('AC', 'AC'),
+    ('LAND_SCAPE', 'LAND_SCAPE'),
+    ('SWIMMING_POOL', 'SWIMMING_POOL'),
+    )
+class Interest(models.Model):
+    client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
+    company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
+
+
 class Reminder(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
     message = models.CharField(max_length=255)
@@ -26,7 +42,8 @@ class Reminder(models.Model):
 
     
 class Contract(models.Model):
-    client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
+    interest=models.ForeignKey(Interest,unique=False , on_delete=models.PROTECT)
+    
     ats=models.CharField("ATS", max_length=64)
     floors=models.CharField("floors", max_length=64)
     lift_type=models.CharField("Type", max_length=64)
@@ -43,9 +60,7 @@ SPARE_PARTS=(
     ('COMPREHENSIVE', 'COMPREHENSIVE'),
     ('REGULAR', 'REGULAR'),
     )
-class MaintenanceLift(models.Model):
-    
-    
+class MaintenanceLift(models.Model): 
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
     maintenance_contract_number=models.CharField("Maintenance Contract Number", max_length=64)
     maintenance_contract_start_date=models.DateTimeField("Maintainance Contract Start")
@@ -78,7 +93,6 @@ PHASES_NAME=(
     )
 
 class Phase(models.Model):
-    client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
     Name=models.CharField("Name of Phase",choices=PHASES_NAME, max_length=64)
     isActive=models.BooleanField(default=False)
@@ -90,7 +104,7 @@ class Phase(models.Model):
    
   
 class Note(models.Model)    :
-    client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
+    
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
     note=models.TextField("Notes",blank=True)
     attachment=models.FileField(blank=True)
@@ -106,7 +120,6 @@ MAINTENANCETYPE_CHOICES=(
     ('PREDICTIVE PERIODIC', 'PREDICTIVE PERIODIC'),
     )   
 class Maintenance(models.Model):
-    client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
     type_name= models.CharField("Type of Maintenance ",choices=MAINTENANCETYPE_CHOICES, max_length=255)
     remarks=models.TextField()

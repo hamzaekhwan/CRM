@@ -31,7 +31,7 @@ urlpatterns = [
     
     
     path('CRMapp/filters/maintenances/', include('CRMapp.filters.maintenances.urls')),
-    path('CRMapp/filters/conracts/', include('CRMapp.filters.contracts.urls')),
+    path('CRMapp/filters/contracts/', include('CRMapp.filters.contracts.urls')),
     path('CRMapp/filters/clients/', include('CRMapp.filters.clients.urls')),
     path('CRMapp/filters/users/', include('CRMapp.filters.users.urls')),
 ]

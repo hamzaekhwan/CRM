@@ -14,4 +14,4 @@ class ClientAdmin(admin.ModelAdmin):
     list_filter = ['city']
     search_fields=['mobile_phone','arabic_name','name']
     actions = [export_to_excel,export_to_pdf,export_to_csv] 
-    inlines = [ContractInline,PhaseInline]
+    # inlines = [ContractInline,PhaseInline]

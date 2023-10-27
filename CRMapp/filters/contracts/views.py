@@ -15,15 +15,16 @@ class ContractListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
     filterset_fields = [
-                        
                         'lift_type',
                         'floors',
-        ]
+                        'interest__company_name',
+                        'interest__client__city',]
     
-    search_fields = ['client__name',
-                     'client__arabic_name',
-                     'client__city',
-                     'client__mobile_phone'
+    search_fields = ['interest__client__name',
+                     'interest__client__mobile_phone',
+                     'interest__client__arabic_name',
+                     'interest__client__city',
+                     'interest__company_name',
                      'ats',
                      'location',]
     
@@ -35,10 +36,44 @@ class ContractListView(generics.ListAPIView):
        
         data = {
             'count': count,
-            'results': Contract(queryset, many=True).data
+            'results': ContractSerializer(queryset, many=True).data
         }
 
         return JsonResponse(data)
            
 
+class ContractPhaseListView(generics.ListAPIView):    
+    queryset = Phase.objects.all()
+    serializer_class = PhaseSerializer
+
+    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+
+    filterset_fields = [
+                        'contract__lift_type',
+                        'contract__floors',
+                        'contract__interest__company_name',
+                        'contract__interest__client__city',
+                        'Name']
     
+    search_fields = ['contract__interest__client__name',
+                     'contract__interest__client__mobile_phone',
+                     'contract__interest__client__arabic_name',
+                     'contract__interest__client__city',
+                     'contract__interest__company_name',
+                     'contract__ats',
+                     'contract__location',
+                     'Name']
+    
+    def get(self, request, *args, **kwargs):
+
+        queryset = self.filter_queryset(self.get_queryset())
+        count = queryset.count()
+        
+       
+        data = {
+            'count': count,
+            'results': PhaseSerializer(queryset, many=True).data
+        }
+
+        return JsonResponse(data)
+           

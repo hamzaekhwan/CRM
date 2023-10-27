@@ -3,6 +3,7 @@ from .serializers import *
 from datetime import datetime
 import json
 from .consumers import ReminderConsumer
+
 from rest_framework.views import *
 from rest_framework.decorators import *
 from rest_framework.response import *
@@ -10,8 +11,6 @@ from rest_framework.permissions import *
 from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 from django.utils import timezone
 
 @api_view(['POST','GET','PUT','DELETE'])
@@ -21,24 +20,30 @@ def client(request,pk=None):
         data=request.data
 
         name=data['name']
-        
-        client_exists = Client.objects.filter(name=name).exists() 
+        mobile_phone=data['mobile_phone']
+        client_exists = Client.objects.filter(name__icontains=name).exists() or Client.objects.filter(mobile_phone=mobile_phone).exists()
         if not client_exists:
             
-            mobile_phone=data['mobile_phone']
+            
             arabic_name=data['arabic_name']
             city=data['city']
-
-            Client.objects.create(name=name,
-                             
+            inquiry=data['inquiry']
+            date=data['date']
+            company_name=data['company_name']
+            client=Client.objects.create(name=name,
                                 mobile_phone=mobile_phone,
                                 arabic_name=arabic_name,
-                                city=city)
+                                city=city,
+                                inquiry=inquiry,
+                                date=date )
+            
+            
+            Interest.objects.create(client=client,company_name=company_name)
 
             message = {'detail': 'Client added successfully'}
             return Response(message) 
         else:
-            message = {'detail': 'client with this name or ATS already exists'}
+            message = {'detail': 'client with this name already exists'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
     
@@ -81,6 +86,9 @@ def client(request,pk=None):
         message = {'detail': 'Client updated successfully'}
         return Response(message) 
 
+    
+
+
 
 @permission_classes([IsAdminUser])
 @api_view(['POST'])  
@@ -121,38 +129,60 @@ def create_reminder(request, pk=None):
     serializer = ReminderSerializer(reminder)
     return Response(serializer.data, status=status.HTTP_201_CREATED)        
 
-# @permission_classes([IsAdminUser])
-# @api_view(['POST'])
-# def create_reminder(request,pk=None):
-    
-#     client=get_object_or_404(Client, id=pk)
-#     data = request.data
 
-    
-#     message=data['message'],
-#     reminder_datetime=data['reminder_datetime']
+@permission_classes([IsAdminUser])
+@api_view(['POST','GET','PUT'])
+def interest(request,pk=None):
+    if request.method == 'POST' :
+        client = get_object_or_404(Client, id=pk)
+        data = request.data
 
-    
+        company_name = data['company_name']
+        
+        interest_exist=Interest.objects.filter(client=client,company_name=company_name)
+        if not interest_exist:
+            Interest.objects.create(
+                client=client,
+                company_name=company_name
+            )
 
-#     reminder = Reminder.objects.create(
-#         client=client,  
-#         message=message,
-#         reminder_datetime=reminder_datetime
-#     )
+            message = {'detail': 'interest added successfully'}
+            return Response(message)
+        else:
+            message = {'detail': 'client with this interest already exists'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-#     users=User.objects.all()
-#     channel_layer = get_channel_layer()
-    
+    if request.method == 'GET' :
+        if pk is not None:
+            user = get_object_or_404(Interest, id=pk)
+            serializer = InterestSerializer(user)
+            return Response(serializer.data)
+        else:
+            query=Interest.objects.all()
+            serializer=InterestSerializer(query,many=True)
+            return JsonResponse(serializer.data,safe=False)
+        
+    if request.method == 'PUT' :
+        interest=get_object_or_404(Interest, id=pk)
+        client=interest.client
+        data=request.data
 
-   
-#     # Trigger message sent to group
-#     for user in users:
-#         async_to_sync(channel_layer.group_send)(
-#             str(user.pk),  # Group Name, Should always be string
-#             {
-#                 "type": "notify",   # Custom Function written in the consumers.py
-#                 "text": reminder.message,
-#             },
-#         )  
-#     serializer = ReminderSerializer(reminder)
-#     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+        company_name = data.get('company_name', interest.company_name)
+        
+        interest_exist=Interest.objects.filter(client=client,company_name=company_name)
+        if not interest_exist :
+            interest.company_name=company_name
+            interest.save()
+            message = {'detail': 'interest updated successfully'}
+            return Response(message) 
+
+        else:
+            message = {'detail': 'client with this interest already exists'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+            
+  
+

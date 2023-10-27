@@ -6,8 +6,8 @@ from rest_framework.response import *
 from rest_framework.permissions import *
 from django.http import JsonResponse
 from CRMapp.models import *
-from .functions import *
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsAdminUser])
@@ -21,17 +21,9 @@ def contract(request,pk=None):
 
         contract_exists = Contract.objects.filter(ats=ats).exists()
         if not contract_exists:
-            client_id=data['client_id']
-            client=Client.objects.get(id=client_id)
 
-            
-           
+            interest=get_object_or_404(Interest, id=pk)
 
-            
-
-          
-
-           
 
             lift_type=data['lift_type']
 
@@ -39,18 +31,12 @@ def contract(request,pk=None):
 
             floors=data['floors']
 
-       
-
-
             location=data['location']
 
-           
-
-            
 
             new_conrtract=Contract.objects.create(
                                         ats=ats,
-                                        client=client,
+                                        interest=interest,
                                         lift_type=lift_type,
                                         size=size,
                                         floors=floors,
@@ -63,7 +49,7 @@ def contract(request,pk=None):
             
 
         else:
-            message = {'detail': 'Contract with this number already exists'}
+            message = {'detail': 'Contract with this Ats already exists'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -84,7 +70,7 @@ def contract(request,pk=None):
         contract = get_object_or_404(Contract, id=pk)
         contract.delete()
       
-        message = {'detail': 'Admin deleted successfully'}
+        message = {'detail': 'Contract deleted successfully'}
         return Response(message)
     
     if request.method == 'PUT' :
@@ -113,6 +99,23 @@ def contract_phases_by_id(request,pk):
     serializer=PhaseSerializer(query,many=True)
     return JsonResponse(serializer.data,safe=False)
 
+
+#api to get contracts by client id
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def client(request,pk=None):
+   
+
+    client=get_object_or_404(Client,id=pk)
+    interests=Interest.objects.filter(client=client)
+
+    
+    contract=Contract.objects.filter(interest__in=interests)
+       
+        
+
+    serializer=ContractSerializer(contract,many=True)
+    return JsonResponse(serializer.data,safe=False)
 #################################################################################
 
 @api_view(['POST','PUT','DELETE','GET'])
@@ -132,7 +135,7 @@ def note(request,pk=None):
             attachment=None
 
         Note.objects.create(contract=contract,
-                                        client=contract.client,
+                                        
                                         note=note,
                                         attachment=attachment,
                                         date=date)
@@ -179,21 +182,31 @@ def note(request,pk=None):
 @permission_classes([IsAdminUser])
 def phase(request,pk=None):
     if request.method == 'POST' :
+        contract = get_object_or_404(Contract, id=pk)
+
         data=request.data
-        contract_obj = get_object_or_404(Contract, id=pk)
-      
         start_date_new_phase=data['start_date'] 
         name=data['name']
 
-        new_phase = move_to_specific_phase(contract_obj,start_date_new_phase,name)
-        if new_phase:
-            message = {'detail': 'move done successfully'}
-            return Response(message)
-        else:
-            message = {'detail': 'there is no phases for this contract'}
+        if name not in [choice[1] for choice in PHASES_NAME]:
+            message = {'detail': 'this phase name doesnt exists'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
+        existing_phase = Phase.objects.filter(contract=contract, Name=name).first()
+        if existing_phase:
+            message = {'detail': 'phase with this name already exists'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        
 
+
+        Phase.objects.create(
+            contract=contract,
+            Name=name,
+            isActive=True,
+            start_date=start_date_new_phase,
+        )
+
+        return JsonResponse({'detail': 'phase created successfully'})
 
     if request.method == 'PUT' :
         phase_obj = get_object_or_404(Phase, id=pk)

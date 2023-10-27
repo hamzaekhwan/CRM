@@ -17,7 +17,7 @@ class ContractInline(admin.TabularInline):
     list_filter = ('type_maintenance', 'spare_parts', 'type', 'brand')
     
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ['client','ats',]
+    list_display = ['ats',]
     list_filter= ['floors']
   
     actions = [export_to_excel,export_to_pdf,export_to_csv] 
@@ -25,12 +25,12 @@ class ContractAdmin(admin.ModelAdmin):
 
 class PhaseAdmin(admin.ModelAdmin):
     list_filter= ['Name','isActive',]
-    list_display = ['client','contract','Name','isActive',]
+    list_display = ['contract','Name','isActive',]
     actions = [export_to_excel,export_to_pdf,export_to_csv] 
-    search_fields=['client','contract',]
+    search_fields=['contract']
 
 class NoteAdmin(admin.ModelAdmin):
     actions = [export_to_excel,export_to_pdf,export_to_csv] 
-    list_display = ['client','contract','date']
-    search_fields=['client','contract']
+    list_display = ['contract','date']
+    search_fields=['contract']
 

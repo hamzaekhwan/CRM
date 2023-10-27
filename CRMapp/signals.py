@@ -5,7 +5,36 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from .models import *
 
+@receiver(pre_save, sender=Client)
+def check_client_exists(sender, instance, **kwargs):
 
+    existing_client = Client.objects.filter(name__icontains=instance.name).first() or Client.objects.filter(mobile_phone=instance.mobile_phone).first()
+    if existing_client and existing_client != instance:
+        
+        raise Exception("Client with this name already exists")
+
+@receiver(pre_save, sender=Interest)
+def check_interest_exists(sender, instance, **kwargs):
+    existing_interest = Interest.objects.filter(client=instance.client, company_name=instance.company_name).first()
+    if existing_interest and existing_interest != instance:
+        
+        raise Exception("Client with this interest already exists")
+
+
+@receiver(pre_save, sender=Phase)
+def check_duplicate_phase(sender, instance, **kwargs):
+    if instance.isActive:
+       
+        Phase.objects.filter(contract=instance.contract, isActive=True).exclude(id=instance.id).update(isActive=False)
+
+    existing_phase = Phase.objects.filter(
+        contract=instance.contract, 
+        Name=instance.Name,
+    ).exclude(id=instance.id)  
+    
+    
+    if existing_phase.exists():
+        raise Exception("contract with this phase already exist")
 
 @receiver(reset_password_token_created)
 def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):

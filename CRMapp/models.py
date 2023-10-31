@@ -3,8 +3,13 @@
 
 from django.db import models
 from .validators import phone_regex
+from .choises import *
+from django.contrib.auth.models import User
 
 
+class UserProfile(models.Model):
+    user=models.OneToOneField(User ,unique=True, on_delete=models.CASCADE)
+    company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
 class Client(models.Model):
     name=models.CharField("Name of Client", max_length=64)
     
@@ -18,28 +23,21 @@ class Client(models.Model):
         return str(self.name ) 
 
 
-COMPANY_NAME=(
-    ('ATLAS', 'ATLAS'),
-    ('KEILANI_INTERIORS', 'KEILANI_INTERIORS'),
-    ('NAMMOUS', 'NAMMOUS'),
-    ('KCC', 'KCC'),
-    ('SMART', 'SMART'),
-    ('AC', 'AC'),
-    ('LAND_SCAPE', 'LAND_SCAPE'),
-    ('SWIMMING_POOL', 'SWIMMING_POOL'),
-    )
 class Interest(models.Model):
     client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
     company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
 
-
+    def __str__(self):
+        return str(self.client.name ) + " - " + str(self.company_name) 
+    
 class Reminder(models.Model):
     client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    admin= models.ForeignKey(User, on_delete=models.CASCADE)
     message = models.CharField(max_length=255)
     reminder_datetime = models.DateTimeField()
     notification_sent = models.BooleanField(default=False)  
 
-    
+   
 class Contract(models.Model):
     interest=models.ForeignKey(Interest,unique=False , on_delete=models.PROTECT)
     
@@ -51,14 +49,8 @@ class Contract(models.Model):
 
     def __str__(self):
         return str(self.ats ) 
-MAINTAINCANCE_CHOICES=(
-    ('FREE', 'FREE'),
-    ('PAID', 'PAID'),
-    )
-SPARE_PARTS=(
-    ('COMPREHENSIVE', 'COMPREHENSIVE'),
-    ('REGULAR', 'REGULAR'),
-    )
+
+
 class MaintenanceLift(models.Model): 
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
     maintenance_contract_number=models.CharField("Maintenance Contract Number", max_length=64)
@@ -77,19 +69,6 @@ class MaintenanceLift(models.Model):
     def __str__(self):
         return str(self.maintenance_contract_number ) 
 
-PHASES_NAME=(
-    
-    ('SALES', 'SALES'),
-    ('ENG', 'ENG'),
-    ('SIGNED_CONTRACT', 'SIGNED_CONTRACT'),
-    ('MANUFACTURING', 'MANUFACTURING'),
-    ('DELIVERY', 'DELIVERY'),
-    ('INSTALLATION', 'INSTALLATION'),
-    ('MECHANICAL', 'MECHANICAL'),
-    ('ELECTRICAL', 'ELECTRICAL'),
-    ('HANDING_OVER', 'HANDING_OVER'),
-    ('MAINTENANCE', 'MAINTENANCE'),
-    )
 
 class Phase(models.Model):
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
@@ -114,10 +93,7 @@ class Note(models.Model)    :
 
    ###########################################################\
 
-MAINTENANCETYPE_CHOICES=(
-    ('EMERGENCY', 'EMERGENCY'),
-    ('PREDICTIVE PERIODIC', 'PREDICTIVE PERIODIC'),
-    )   
+  
 class Maintenance(models.Model):
     contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
     type_name= models.CharField("Type of Maintenance ",choices=MAINTENANCETYPE_CHOICES, max_length=255)

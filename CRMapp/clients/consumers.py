@@ -1,46 +1,69 @@
-
+from channels.generic.websocket import WebsocketConsumer,AsyncWebsocketConsumer
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
-from CRMapp.models import Reminder
-from asgiref.sync import async_to_sync
-from datetime import datetime
-from django.contrib.auth.models import User
 
-class ReminderConsumer(AsyncWebsocketConsumer):
+from channels.layers import get_channel_layer
+from CRMapp.models import *
+from django.contrib.auth.models import User,AnonymousUser
+
+
+@database_sync_to_async
+def get_user(user_id):
+    try:
+        return User.objects.get(id=user_id)
+    except:
+        return AnonymousUser()
+
+@database_sync_to_async
+def create_reminder(receiver):
+    reminder_to_create=Reminder.objects.create(admin=receiver)
+    print('I am here to help')
+    return (reminder_to_create.admin.username)
+
+
+class NotificationConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        await self.accept()
+            print('connected')
+            print('Am i finallyy here')
+       
+            await self.accept()
 
-    async def disconnect(self, close_code):
-        pass
+            await self.send(json.dumps({
+                        "type":"websocket.send",
+                        "text":"hello world"
+                    }))
+  
+            self.send({
+                "type":"websocket.send",
+                "text":"room made"
+            })
+    
+    async def disconnect(self):
+        print('disconnect')
+        
+    async def receive(self,event):
+        print(event)
+        data_to_get=json.loads(event['text'])
+        user_to_get=await get_user(int(data_to_get))
+        print(user_to_get)
+        get_of=await create_reminder(user_to_get)
+        self.room_group_name='test_consumer_group'
+        channel_layer=get_channel_layer()
+        await (channel_layer.group_send)(
+            self.room_group_name,
+            {
+                "type":"send_notification",
+                "value":json.dumps(get_of)
+            }
+)
+        print('receive',event)        
 
-    async def notify(self, event):
-        await self.send(event["text"])
+    
+    async def send_notification(self,event):
+        await self.send(json.dumps({
+            "type":"websocket.send",
+            "data":event
+        }))
+        print('I am here')
+        print(event)    
 
-    @database_sync_to_async
-    def send_notification(self, reminder):
-        users=User.objects.all()
-        for user in users:
-            async_to_sync(self.channel_layer.group_send)(
-                str(user.pk),
-                {
-                    "type": "notify",
-                    "text": reminder.message,
-                },
-            )
-
-    async def receive(self, text_data):
-        data = json.loads(text_data)
-        if data["action"] == "start":
-            current_time = datetime.now()
-            reminders = Reminder.objects.filter(
-                reminder_datetime__lte=current_time,
-                notification_sent=False
-
-            )
-
-            for reminder in reminders:
-                await self.send_notification(reminder)
-
-                reminder.notification_sent = True
-                reminder.save()

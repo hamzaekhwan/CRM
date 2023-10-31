@@ -17,7 +17,7 @@ from django.contrib import admin
 from django.urls import include, path
 from django.conf.urls.static import static
 from django.conf import settings
-
+from CRMapp.clients import consumers
 
 filter_urls = ['maintenances', 'contracts', 'clients', 'users']
 
@@ -28,8 +28,8 @@ urlpatterns = [
     path('CRMapp/contracts/', include('CRMapp.contracts.urls')),
     path('CRMapp/maintenances/', include('CRMapp.maintenances.urls')),
     path('CRMapp/maintenanceslift/', include('CRMapp.maintenanceslift.urls')),
-    
-    
+  
+
     path('CRMapp/filters/maintenances/', include('CRMapp.filters.maintenances.urls')),
     path('CRMapp/filters/contracts/', include('CRMapp.filters.contracts.urls')),
     path('CRMapp/filters/clients/', include('CRMapp.filters.clients.urls')),

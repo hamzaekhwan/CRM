@@ -1,17 +1,15 @@
 
 from .serializers import *
-from datetime import datetime
-import json
-from .consumers import ReminderConsumer
-
 from rest_framework.views import *
 from rest_framework.decorators import *
 from rest_framework.response import *
 from rest_framework.permissions import *
+
 from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
-from django.utils import timezone
+
+
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsAdminUser])
@@ -87,51 +85,10 @@ def client(request,pk=None):
         return Response(message) 
 
     
+ 
 
-
-
-@permission_classes([IsAdminUser])
-@api_view(['POST'])  
-def create_reminder(request, pk=None):
-    client = get_object_or_404(Client, id=pk)
-    data = request.data
-
-    message = data['message']
-    reminder_datetime_str = data['reminder_datetime']
-    reminder_datetime = datetime.strptime(reminder_datetime_str, '%Y-%m-%d')
-    reminder_datetime = timezone.make_aware(reminder_datetime, timezone=timezone.utc)
-
-    current_time = timezone.now()
-
-    if reminder_datetime <= current_time:
-        message = {'detail': "The reminder time must be set in the future."}
-        return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-    reminder = Reminder.objects.create(
-        client=client,
-        message=message,
-        reminder_datetime=reminder_datetime
-    )
-
-    # Initialize the WebSocket consumer to send notifications
-    reminder_consumer = ReminderConsumer()
-   
-
-    # Check if the reminder should be sent immediately
-    if reminder_datetime <= current_time:
-        reminder_consumer.send_notification(reminder)
-        reminder.notification_sent = True
-        reminder.save()
-    else:
-        # Schedule the reminder for future delivery
-        reminder_consumer.receive(json.dumps({"action": "start"}))
-
-    serializer = ReminderSerializer(reminder)
-    return Response(serializer.data, status=status.HTTP_201_CREATED)        
-
-
-@permission_classes([IsAdminUser])
 @api_view(['POST','GET','PUT'])
+@permission_classes([IsAdminUser])
 def interest(request,pk=None):
     if request.method == 'POST' :
         client = get_object_or_404(Client, id=pk)
@@ -185,4 +142,3 @@ def interest(request,pk=None):
 
             
   
-

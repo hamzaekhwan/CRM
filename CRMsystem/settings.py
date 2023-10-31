@@ -49,6 +49,9 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
     'corsheaders',
+    'channels',
+   
+    
    
 ]
 
@@ -184,7 +187,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],   # Change localhost to the ip in which you have redis server running on.
+            "hosts": [("localhost", 6379)],
         },
     },
 }
@@ -203,8 +206,7 @@ USE_L10N = True
 USE_TZ = True
 
 
-ASGI_APPLICATION = "CRMsystem.asgi.application"
-
+ASGI_APPLICATION='CRMsystem.asgi.application'
 
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_HOST_USER = 'jaberissa442@gmail.com'

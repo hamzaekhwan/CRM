@@ -1,17 +1,23 @@
-"""
-ASGI config for CRMsystem project.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
 
-For more information on this file, see
-https://docs.djangoproject.com/en/3.2/howto/deployment/asgi/
-"""
 
+
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.security.websocket import AllowedHostsOriginValidator
+from channels.auth import AuthMiddlewareStack
+from django.urls import path
+from CRMapp.clients import consumers
+from django.core.asgi import get_asgi_application
 import os
-import django
-from channels.routing import get_default_application
-# from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CRMsystem.settings')
-django.setup()
-application = get_default_application()
+ws_patterns=[path('ws/test/',consumers.NotificationConsumer.as_asgi())]
+application = ProtocolTypeRouter({
+    "http": get_asgi_application(),
+    'websocket':
+       
+            URLRouter(ws_patterns)}
+    )
+    
+
+

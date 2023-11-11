@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
    
     isAdmin = serializers.SerializerMethodField(read_only=True)
-    profile= UserProfileSerializer(read_only=True)
+    profile= serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'name', 'isAdmin','profile']
@@ -34,13 +34,19 @@ class UserSerializer(serializers.ModelSerializer):
 
         return name
     
+    def get_profile(self, obj):
+        user=obj.id
+        profile=UserProfile.objects.get(user=user)
+        serializer=UserProfileSerializer(profile,many=False)
+        return serializer.data
+    
  
 
 
 
 class UserSerializerWithToken(UserSerializer):
     token = serializers.SerializerMethodField(read_only=True)
-
+    
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'name', 'isAdmin', 'token']
@@ -75,4 +81,4 @@ class ChangePasswordSerializer(serializers.ModelSerializer):
         instance.set_password(validated_data['password'])
         instance.save()
 
-        return instance    
+        return instance

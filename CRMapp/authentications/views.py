@@ -151,9 +151,6 @@ def admin(request,pk=None):
         profile.isMangerMaint=isMangerMaint
         profile.isEmp=isEmp
 
- 
-
-
        
         profile.save()
         user_obj.save()

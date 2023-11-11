@@ -32,11 +32,11 @@ def client(request,pk=None):
                                 mobile_phone=mobile_phone,
                                 arabic_name=arabic_name,
                                 city=city,
-                                inquiry=inquiry,
+      
                                 date=date )
             
             
-            Interest.objects.create(client=client,company_name=company_name)
+            Interest.objects.create(client=client,company_name=company_name,inquiry=inquiry)
 
             message = {'detail': 'Client added successfully'}
             return Response(message) 
@@ -95,12 +95,13 @@ def interest(request,pk=None):
         data = request.data
 
         company_name = data['company_name']
-        
+        inquiry=data['inquiry']
         interest_exist=Interest.objects.filter(client=client,company_name=company_name)
         if not interest_exist:
             Interest.objects.create(
                 client=client,
-                company_name=company_name
+                company_name=company_name,
+                inquiry=inquiry
             )
 
             message = {'detail': 'interest added successfully'}
@@ -126,10 +127,12 @@ def interest(request,pk=None):
 
 
         company_name = data.get('company_name', interest.company_name)
+        inquiry = data.get('inquiry', interest.inquiry)
         
         interest_exist=Interest.objects.filter(client=client,company_name=company_name)
         if not interest_exist :
             interest.company_name=company_name
+            interest.inquiry=inquiry
             interest.save()
             message = {'detail': 'interest updated successfully'}
             return Response(message) 

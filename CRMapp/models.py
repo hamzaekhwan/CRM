@@ -16,7 +16,7 @@ class Client(models.Model):
     mobile_phone=models.CharField(validators=[phone_regex], max_length=17)
     arabic_name=models.CharField("Arabic Name of Client", max_length=64)
     city=models.CharField("city", max_length=64)
-    inquiry=models.BooleanField("INQUIRY",default=True)
+    
     date=models.DateTimeField("Date of client register",blank=True,null=True)
     
     def __str__(self):
@@ -25,6 +25,7 @@ class Client(models.Model):
 
 class Interest(models.Model):
     client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
+    inquiry=models.BooleanField("INQUIRY",default=True)
     company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
 
     def __str__(self):

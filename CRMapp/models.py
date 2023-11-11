@@ -10,6 +10,11 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user=models.OneToOneField(User ,unique=True, on_delete=models.CASCADE)
     company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
+    isMaint=models.BooleanField("isMaint",default=False)   #عامل صيانة IsAuthenticatedAndIsMaint
+    isManager=models.BooleanField("isManager",default=False) #مدير كل شيء isAdminUser
+    isMangerMaint=models.BooleanField("isMangerMaint",default=False) #مدير الصيانة isAdminUser
+    isEmp=models.BooleanField("isEmp",default=False)#موظف عادي isAuth
+
 class Client(models.Model):
     name=models.CharField("Name of Client", max_length=64)
     

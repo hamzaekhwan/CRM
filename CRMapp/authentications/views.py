@@ -64,7 +64,7 @@ class ChangePasswordView(generics.UpdateAPIView):
         
 
 @api_view(['POST','PUT','GET','DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAuthenticated, IsAdminUser])
 def admin(request,pk=None):
     if request.method=="POST":
         
@@ -72,18 +72,35 @@ def admin(request,pk=None):
         username=data['username']
         email=data['email']
         password=data['password']
+        
         name=data['name']
-     
+        company_name=data['company_name']
+        isMaint=data['isMaint']
+        isManager=data['isManager']
+        isMangerMaint=data['isMangerMaint']
+        isEmp=data['isEmp']
 
-        superuser_exists = User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists() or User.objects.filter(first_name=name).exists()
-        if not superuser_exists:
-            superuser = User.objects.create_superuser(username, email, password)
-            
-    
-            superuser.first_name=name
-         
-            superuser.save()
-            message = {'detail': 'Admin added successfully'}
+        user_exists = User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists()
+        if not user_exists:
+            user = User.objects.create_user(username=username, email=email, password=password)
+           
+            if isManager==True or isMangerMaint==True:
+                user.is_superuser = True
+                user.is_staff=True
+            user.save()
+
+            profile = UserProfile.objects.create(
+                user=user,
+                company_name=company_name,
+                isMaint=isMaint,
+                isManager=isManager,
+                isMangerMaint=isMangerMaint,
+                isEmp=isEmp
+            )
+            user.first_name=name
+            profile.save()
+
+            message = {'detail': 'User added successfully'}
             return Response(message)
         else :
             message = {'detail': 'User with this email or username already exists'}
@@ -115,13 +132,30 @@ def admin(request,pk=None):
         email = data.get('email', user_obj.email)
         username = data.get('username', user_obj.username)
         name = data.get('name', user_obj.first_name)
-        
 
         user_obj.email = email
         user_obj.username = username
         user_obj.first_name = name
-       
 
+        profile=UserProfile.objects.get(user=user_obj)
+
+        company_name = data.get('company_name', profile.company_name)
+        isMaint = data.get('isMaint', profile.isMaint)
+        isManager = data.get('isManager', profile.isManager)
+        isMangerMaint = data.get('isMangerMaint', profile.isMangerMaint)
+        isEmp = data.get('isEmp', profile.isEmp)
+
+        profile.company_name=company_name
+        profile.isMaint=isMaint
+        profile.isManager=isManager
+        profile.isMangerMaint=isMangerMaint
+        profile.isEmp=isEmp
+
+ 
+
+
+       
+        profile.save()
         user_obj.save()
 
         message = {'detail': 'User updated successfully'}

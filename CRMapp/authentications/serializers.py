@@ -6,6 +6,11 @@ from django.contrib.auth.password_validation import validate_password
 from CRMapp.models import *
 
 
+class UserProfileSerializer(serializers.ModelSerializer):
+  
+    class Meta:
+        model = UserProfile
+        fields='__all__'
 
 
 
@@ -13,10 +18,10 @@ class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
    
     isAdmin = serializers.SerializerMethodField(read_only=True)
-
+    profile= UserProfileSerializer(read_only=True)
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'name', 'isAdmin']
+        fields = ['id', 'username', 'email', 'name', 'isAdmin','profile']
 
     def get__id(self, obj):
         return obj.id
@@ -28,6 +33,8 @@ class UserSerializer(serializers.ModelSerializer):
         name = obj.first_name
 
         return name
+    
+ 
 
 
 

@@ -8,9 +8,10 @@ from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from CRMapp.authentications.permissions import *
 
 @api_view(['POST','GET','PUT','DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def contract(request,pk=None):
     if request.method == 'POST' :
         data=request.data
@@ -90,7 +91,7 @@ def contract(request,pk=None):
         
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def contract_phases_by_id(request,pk):
 
     contract_obj=Contract.objects.get(id=pk)
@@ -102,7 +103,7 @@ def contract_phases_by_id(request,pk):
 
 #api to get contracts by client id
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def client(request,pk=None):
    
 
@@ -119,7 +120,7 @@ def client(request,pk=None):
 #################################################################################
 
 @api_view(['POST','PUT','DELETE','GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def note(request,pk=None):
     if request.method == 'POST' :
         data=request.data
@@ -179,7 +180,7 @@ def note(request,pk=None):
 
 
 @api_view(['POST','PUT','DELETE','GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def phase(request,pk=None):
     if request.method == 'POST' :
         contract = get_object_or_404(Contract, id=pk)
@@ -238,7 +239,7 @@ def phase(request,pk=None):
             return Response(serializer.data)
 
 @api_view(['PUT'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def end_phase(request,pk):
     
     Phase.objects.filter(id=pk).update(isActive=False,end_date=timezone.now())

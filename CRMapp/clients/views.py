@@ -4,7 +4,7 @@ from rest_framework.views import *
 from rest_framework.decorators import *
 from rest_framework.response import *
 from rest_framework.permissions import *
-
+from CRMapp.authentications.permissions import *
 from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 
 
 @api_view(['POST','GET','PUT','DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def client(request,pk=None):
     if request.method == 'POST' :
         data=request.data
@@ -88,7 +88,7 @@ def client(request,pk=None):
  
 
 @api_view(['POST','GET','PUT'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsManager,IsManagerMaint,isEmp])
 def interest(request,pk=None):
     if request.method == 'POST' :
         client = get_object_or_404(Client, id=pk)

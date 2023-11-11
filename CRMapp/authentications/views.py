@@ -8,6 +8,7 @@ from rest_framework.decorators import *
 from rest_framework.response import *
 from rest_framework.permissions import *
 from django.shortcuts import get_object_or_404
+from .permissions import * 
 # Create your views here.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
@@ -64,7 +65,7 @@ class ChangePasswordView(generics.UpdateAPIView):
         
 
 @api_view(['POST','PUT','GET','DELETE'])
-@permission_classes([IsAuthenticated, IsAdminUser])
+@permission_classes([IsManager])
 def admin(request,pk=None):
     if request.method=="POST":
         
@@ -83,7 +84,7 @@ def admin(request,pk=None):
         user_exists = User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists()
         if not user_exists:
             user = User.objects.create_user(username=username, email=email, password=password)
-           
+            
             if isManager==True or isMangerMaint==True:
                 user.is_superuser = True
                 user.is_staff=True

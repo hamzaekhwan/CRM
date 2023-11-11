@@ -1,10 +1,40 @@
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save , post_save
 from django.dispatch import receiver
 from django_rest_passwordreset.signals import reset_password_token_created
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from django.template.loader import render_to_string
 from .models import *
+
+
+@receiver(post_save, sender=UserProfile)
+def check_user_position(sender, instance, **kwargs):
+    if instance.isMaint:
+        instance.isManager = False
+        instance.isMangerMaint = False
+        instance.isEmp = False
+        instance.user.is_superuser = False
+        instance.user.is_staff = False
+    elif instance.isManager:
+        instance.isMaint = False
+        instance.isMangerMaint = False
+        instance.isEmp = False
+        instance.user.is_superuser = True
+        instance.user.is_staff = True
+    elif instance.isMangerMaint:
+        instance.isMaint = False
+        instance.isManager = False
+        instance.isEmp = False
+        instance.user.is_superuser = True
+        instance.user.is_staff = True
+    elif instance.isEmp:
+        instance.isMaint = False
+        instance.isManager = False
+        instance.isMangerMaint = False
+        instance.user.is_superuser = True
+        instance.user.is_staff = True
+    instance.save()
+
 
 @receiver(pre_save, sender=Client)
 def check_client_exists(sender, instance, **kwargs):

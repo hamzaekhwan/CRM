@@ -84,10 +84,6 @@ def admin(request,pk=None):
         user_exists = User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists()
         if not user_exists:
             user = User.objects.create_user(username=username, email=email, password=password)
-            
-            if isManager==True or isMangerMaint==True:
-                user.is_superuser = True
-                user.is_staff=True
             user.save()
 
             profile = UserProfile.objects.create(
@@ -154,6 +150,7 @@ def admin(request,pk=None):
 
        
         profile.save()
+       
         user_obj.save()
 
         message = {'detail': 'User updated successfully'}

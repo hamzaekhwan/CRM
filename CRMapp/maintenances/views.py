@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from CRMapp.authentications.permissions import *
 
 @api_view(['POST','GET','PUT','DELETE'])
-@permission_classes([IsManager,IsManagerMaint ,IsMaint])
+@permission_classes([IsManager | IsManagerMaint | IsMaint])
 def maintenance(request,pk=None):
  
     if request.method == 'POST' :

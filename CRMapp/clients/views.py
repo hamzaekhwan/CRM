@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 
 
 @api_view(['POST','GET','PUT','DELETE'])
-@permission_classes([IsManager,IsManagerMaint,isEmp])
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
 def client(request,pk=None):
     if request.method == 'POST' :
         data=request.data
@@ -88,7 +88,7 @@ def client(request,pk=None):
  
 
 @api_view(['POST','GET','PUT'])
-@permission_classes([IsManager,IsManagerMaint,isEmp])
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
 def interest(request,pk=None):
     if request.method == 'POST' :
         client = get_object_or_404(Client, id=pk)
@@ -143,5 +143,6 @@ def interest(request,pk=None):
 
 
 
+
             
-  
+

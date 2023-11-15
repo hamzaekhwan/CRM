@@ -8,7 +8,7 @@ from django.shortcuts import get_object_or_404
 from CRMapp.authentications.permissions import *
 
 @api_view(['POST','PUT','DELETE','GET'])
-@permission_classes([IsManager,IsManagerMaint])
+@permission_classes([IsManager | IsManagerMaint ])
 def maintenancelift(request,pk=None):
     if request.method == 'POST' :
         data=request.data

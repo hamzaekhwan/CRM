@@ -2,7 +2,7 @@ from CRMapp.models import *
 from rest_framework import permissions
 
 
-class isEmp(permissions.BasePermission):
+class IsEmp(permissions.BasePermission):
     def has_permission(self, request, view):
         # تحقق مما إذا كان المستخدم مصادق عليه
         is_authenticated = bool(request.user and request.user.is_authenticated)
@@ -37,10 +37,12 @@ class IsManager(permissions.BasePermission):
 
         # تحقق مما إذا كان لدى المستخدم isMaint = True في UserProfile
         try:
+            
             isManager = request.user.userprofile.isManager
         except UserProfile.DoesNotExist:
             isManager = False
-
+        
+      
         return is_superuser and isManager
 
 class IsManagerMaint(permissions.BasePermission):

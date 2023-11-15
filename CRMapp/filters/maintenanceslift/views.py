@@ -2,13 +2,14 @@
 from rest_framework import generics
 from CRMapp.models import *
 from CRMapp.maintenanceslift.serializers import *
-
+from CRMapp.authentications.permissions import *
 from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 
 
 class MaintenanceLiftListView(generics.ListAPIView):
+    permission_classes = [IsManager | IsManagerMaint ]
     queryset = MaintenanceLift.objects.all()
     serializer_class = MaintenanceLiftSerializer
 

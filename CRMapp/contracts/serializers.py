@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from CRMapp.models import *
 from CRMapp.clients.serializers import InterestSerializer
-
-
+# from CRMapp. .serializers import InterestSerializer
+# from CRMapp.maintenanceslift.serializers import MaintenanceLiftSerializer
 
 
 
@@ -17,11 +17,16 @@ class PhaseSerializer(serializers.ModelSerializer):
         model = Phase
         fields='__all__'
 
+class ContractMaintenanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MaintenanceLift
+        fields = '__all__'
 
 class ContractSerializer(serializers.ModelSerializer):
     notes=serializers.SerializerMethodField()
     current_phase=serializers.SerializerMethodField()
     interest=serializers.SerializerMethodField()
+    # maintenance=serializers.SerializerMethodField()
     class Meta:
         model = Contract
         fields = [
@@ -35,6 +40,7 @@ class ContractSerializer(serializers.ModelSerializer):
                 'location',
                 'notes',
                 'current_phase',
+                # 'maintenance',
                   
         ]
     
@@ -45,7 +51,7 @@ class ContractSerializer(serializers.ModelSerializer):
 
     def get_notes(self, obj):
         
-        contract=Contract.objects.filter(id=obj.interest.client.id).first()
+        contract=Contract.objects.get(id=obj.id)
         
         
         query=Note.objects.filter(contract=contract)
@@ -53,9 +59,20 @@ class ContractSerializer(serializers.ModelSerializer):
         return serializer.data
     
     def get_current_phase(self, obj):
-        contract=Contract.objects.filter(id=obj.interest.client.id).first()
+        contract=Contract.objects.get(id=obj.id)
         current_phase=Phase.objects.filter(contract=contract,isActive=True)
-        return current_phase.first().Name
+        if current_phase.exists() :
+            return current_phase.first().Name
+        else: 
+            
+            return ""
+    
+    # def get_maintenance(self, obj):
+    #     contract=Contract.objects.get(id=obj.id)
+    #     query=MaintenanceLift.objects.filter(contract=contract)
+    #     serializer=ContractMaintenanceSerializer(query,many=True)
+    #     return serializer.data
+
 
 
 

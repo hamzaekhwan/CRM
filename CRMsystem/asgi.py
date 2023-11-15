@@ -11,13 +11,8 @@ from django.core.asgi import get_asgi_application
 import os
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'CRMsystem.settings')
-ws_patterns=[path('ws/test/',consumers.NotificationConsumer.as_asgi())]
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    'websocket':
-       
-            URLRouter(ws_patterns)}
-    )
-    
+application = get_asgi_application()
+
+
 
 

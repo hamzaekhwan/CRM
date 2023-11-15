@@ -95,7 +95,10 @@ def admin(request,pk=None):
                 isEmp=isEmp
             )
             user.first_name=name
-            profile.save()
+            if profile.isEmp== "True" or profile.isManager=="True" or profile.isMangerMaint=="True" : 
+                user.is_superuser=True
+                user.is_staff=True 
+            user.save()
 
             message = {'detail': 'User added successfully'}
             return Response(message)
@@ -148,8 +151,15 @@ def admin(request,pk=None):
         profile.isMangerMaint=isMangerMaint
         profile.isEmp=isEmp
 
-       
         profile.save()
+
+        if profile.isEmp=="True" or profile.isManager=="True" or profile.isMangerMaint=="True" : 
+            user_obj.is_superuser=True
+            user_obj.is_staff=True
+
+        if profile.isMaint == "True" : 
+            user_obj.is_superuser=False
+            user_obj.is_staff=False
        
         user_obj.save()
 

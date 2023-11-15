@@ -1,4 +1,7 @@
+# في ملف CRMapp/apps.py
+
 from django.apps import AppConfig
+# from django_cron import CronJobBase, Schedule
 
 
 class CrmappConfig(AppConfig):
@@ -6,4 +9,5 @@ class CrmappConfig(AppConfig):
     name = 'CRMapp'
 
     def ready(self):
-        import CRMapp.signals  
+        import CRMapp.signals
+        

@@ -58,7 +58,7 @@ class Contract(models.Model):
 
 
 class MaintenanceLift(models.Model): 
-    contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
+    contract=models.OneToOneField(Contract,unique=True , on_delete=models.PROTECT)
     maintenance_contract_number=models.CharField("Maintenance Contract Number", max_length=64)
     maintenance_contract_start_date=models.DateTimeField("Maintainance Contract Start")
     maintenance_contract_end_date=models.DateTimeField("Maintainance Contract End")

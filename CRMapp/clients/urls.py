@@ -7,5 +7,5 @@ from django.urls import include, path
 urlpatterns = [
     path('client/', views.client, name='client'),    
     path('client/<str:pk>/', views.client, name='client_by_id'),    
-    path('interest/<str:pk>/', views.interest, name='create-reminder'),
+    path('interest/<str:pk>/', views.interest, name='create-interest'),
 ]

@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from CRMapp.models import *
-from CRMapp.clients.serializers import ClientSerializer
+
 from CRMapp.contracts.serializers import ContractSerializer
 
 class MaintenanceLiftSerializer(serializers.ModelSerializer):

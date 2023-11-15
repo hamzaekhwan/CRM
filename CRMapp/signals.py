@@ -7,33 +7,8 @@ from django.template.loader import render_to_string
 from .models import *
 
 
-@receiver(post_save, sender=UserProfile)
-def check_user_position(sender, instance, **kwargs):
-    if instance.isMaint:
-        instance.isManager = False
-        instance.isMangerMaint = False
-        instance.isEmp = False
-        instance.user.is_superuser = False
-        instance.user.is_staff = False
-    elif instance.isManager:
-        instance.isMaint = False
-        instance.isMangerMaint = False
-        instance.isEmp = False
-        instance.user.is_superuser = True
-        instance.user.is_staff = True
-    elif instance.isMangerMaint:
-        instance.isMaint = False
-        instance.isManager = False
-        instance.isEmp = False
-        instance.user.is_superuser = True
-        instance.user.is_staff = True
-    elif instance.isEmp:
-        instance.isMaint = False
-        instance.isManager = False
-        instance.isMangerMaint = False
-        instance.user.is_superuser = True
-        instance.user.is_staff = True
-    instance.save()
+
+
 
 
 @receiver(pre_save, sender=Client)

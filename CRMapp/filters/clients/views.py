@@ -3,19 +3,20 @@ from rest_framework import generics
 from CRMapp.models import *
 from CRMapp.contracts.serializers import *
 from CRMapp.clients.serializers import *
-
+from CRMapp.authentications.permissions import *
 from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 
 
 class ClientListView(generics.ListAPIView):
+    permission_classes = [IsManager | IsManagerMaint | IsEmp]
     queryset = Client.objects.all()
     serializer_class = ClientSerializer
-
+    
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
-    filterset_fields = ['city','inquiry']
+    filterset_fields = ['city']
     
     search_fields = ['name',
                      'arabic_name',
@@ -38,12 +39,13 @@ class ClientListView(generics.ListAPIView):
            
 
 class InterestListView(generics.ListAPIView):
+    permission_classes = [IsManager | IsManagerMaint | IsEmp]
     queryset = Interest.objects.all()
     serializer_class = InterestSerializer
-
+    
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
-    filterset_fields = ['client__city','client__inquiry','company_name']
+    filterset_fields = ['client__city','client__inquiry','company_name','inquiry']
     
     search_fields = ['client__name',
                      'client__arabic_name',

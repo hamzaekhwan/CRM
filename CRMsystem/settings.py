@@ -35,7 +35,10 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
+    'django_crontab',
     'CRMapp',
+   
+
     'jazzmin',
     
     'django_filters',
@@ -49,12 +52,15 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
     'corsheaders',
-    'channels',
-   
+ 
     
    
 ]
 
+
+CRONJOBS = [
+    ('0 0 * * *', 'CRMapp.clients.cron.DailyReminderJob'),
+]
 
 
 JAZZMIN_SETTINGS=JAZZMIN_SETTINGS
@@ -183,14 +189,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [("localhost", 6379)],
-        },
-    },
-}
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

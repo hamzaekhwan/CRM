@@ -6,9 +6,10 @@ from CRMapp.contracts.serializers import *
 from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
-
+from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
+    permission_classes = [IsManager | IsManagerMaint | IsEmp]
     queryset = Contract.objects.all()
     serializer_class = ContractSerializer
 
@@ -43,6 +44,7 @@ class ContractListView(generics.ListAPIView):
            
 
 class ContractPhaseListView(generics.ListAPIView):    
+    permission_classes = [IsManager | IsManagerMaint | IsEmp]
     queryset = Phase.objects.all()
     serializer_class = PhaseSerializer
 

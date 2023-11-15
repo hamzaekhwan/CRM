@@ -7,9 +7,10 @@ from django.contrib.auth.models import User
 from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
-
+from CRMapp.authentications.permissions import *
 
 class UserListView(generics.ListAPIView):
+    permission_classes = [IsManager | IsManagerMaint ]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 

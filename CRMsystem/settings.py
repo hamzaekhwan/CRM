@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-6$l^7##j5gp++yn30o8tj1kioda+_8aye5*qsk)fla^y)xf7n*'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -35,12 +35,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
-    'django_crontab',
+    # 'django_apscheduler',
     'CRMapp',
-   
-
     'jazzmin',
-    
     'django_filters',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,11 +54,7 @@ INSTALLED_APPS = [
    
 ]
 
-
-CRONJOBS = [
-    ('0 0 * * *', 'CRMapp.clients.cron.DailyReminderJob'),
-]
-
+SCHEDULER_ALLOWED_HOSTS = ["localhost", "127.0.0.1"] 
 
 JAZZMIN_SETTINGS=JAZZMIN_SETTINGS
 

@@ -9,5 +9,7 @@ class CrmappConfig(AppConfig):
     name = 'CRMapp'
 
     def ready(self):
+        # from CRMapp.clients import tasks
+        # tasks.scheduled_job()
         import CRMapp.signals
         

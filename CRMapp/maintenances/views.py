@@ -43,18 +43,18 @@ def maintenance(request,pk=None):
 
 
         message = {'detail': 'maint added successfully'}
-        return JsonResponse(message, status=status.HTTP_200_OK)
+        return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
     
     if request.method == 'GET' :  
         if pk is not None:
             maintenance = get_object_or_404(Maintenance, id=pk)
             
             serializer = MaintenanceSerializer(maintenance)
-            return JsonResponse(serializer.data)
+            return JsonResponse(serializer.data,safe=False)
         else:
             maintenances = Maintenance.objects.all()
             serializer = MaintenanceSerializer(maintenances, many=True)
-            return JsonResponse(serializer.data)                 
+            return JsonResponse(serializer.data,safe=False)                 
 
     if request.method == 'DELETE' :
         maintenance = get_object_or_404(Maintenance, id=pk)
@@ -70,4 +70,4 @@ def maintenance(request,pk=None):
                     Maintenance.objects.filter(id=maintenance_obj.id).update(**{key: value})
 
         message = {'detail': 'Maintenance updated successfully'}
-        return JsonResponse(message)        
+        return JsonResponse(message,safe=False)        

@@ -17,13 +17,13 @@ class ClientListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
     filterset_fields = ['city']
-    
+ 
     search_fields = ['name',
                      'arabic_name',
                      'city',
                      'mobile_phone',
                      ]
-    
+
     def get(self, request, *args, **kwargs):
 
         queryset = self.filter_queryset(self.get_queryset())
@@ -45,7 +45,7 @@ class InterestListView(generics.ListAPIView):
     
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
-    filterset_fields = ['client__city','client__inquiry','company_name','inquiry']
+    filterset_fields = ['client__city','inquiry','company_name']
     
     search_fields = ['client__name',
                      'client__arabic_name',

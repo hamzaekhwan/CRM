@@ -8,8 +8,8 @@ from CRMapp.models import *
 from django.shortcuts import get_object_or_404
 from CRMapp.authentications.permissions import *
 from django.contrib.auth import login
-
 from django.db.models import Q
+
 ############# login for mobile
 @api_view(['POST'])
 def login_mobile(request):
@@ -47,34 +47,22 @@ def maintenance(request,pk=None):
  
     if request.method == 'POST' :
         contract = get_object_or_404(Contract, id=pk)
-      
+        maintenance_lift=MaintenanceLift.objects.get_or_create(contract=contract)
         data=request.data
        
-        data = request.data
         type_name=data['type_name']
         remarks=data['remarks']
         date=data['date']
-        signature_of_client=request.FILES.get('signature_of_client')
-        signature_of_supervisor=request.FILES.get('signature_of_supervisor')
-        signature_of_technician=request.FILES.get('signature_of_technician')
-
+        check_image=request.FILES.get('check_image')
+       
         maintenance=Maintenance.objects.create(contract=contract,
-                             
+                                    maintenance_lift=maintenance_lift,
                                     type_name=type_name,
                                     remarks=remarks,
                                     date=date,
-                                    signature_of_client=signature_of_client,
-                                    signature_of_supervisor=signature_of_supervisor,
-                                    signature_of_technician=signature_of_technician )
-        
-        mysections=data['mysections']
-        mysections = eval(mysections)
-        for key, value in mysections.items():
-            if hasattr(Maintenance, key):
-                Maintenance.objects.filter(id=maintenance.id).update(**{key: value})
-
-
-
+                                    check_image=check_image,
+                                     )
+    
         message = {'detail': 'maint added successfully'}
         return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
     
@@ -98,9 +86,22 @@ def maintenance(request,pk=None):
     if request.method == 'PUT' :
         maintenance_obj = get_object_or_404(Maintenance, id=pk)
         data = request.data
-        for key,value in data.items():
-            if hasattr(Maintenance, key):
-                    Maintenance.objects.filter(id=maintenance_obj.id).update(**{key: value})
+
+        
+        maintenance_obj.type_name = data.get('type_name', maintenance_obj.type_name)
+        maintenance_obj.remarks = data.get('remarks', maintenance_obj.remarks)
+        maintenance_obj.date = data.get('date', maintenance_obj.date)
+
+        check_image = request.FILES.get('check_image', None)
+        if check_image is not None:
+            maintenance_obj.check_image = check_image
+
+       
+        
+        
+
+        maintenance_obj.save()
 
         message = {'detail': 'Maintenance updated successfully'}
-        return JsonResponse(message,safe=False)        
+        return Response(message, status=status.HTTP_200_OK)
+           

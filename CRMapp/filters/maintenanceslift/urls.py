@@ -7,7 +7,7 @@ from django.urls import include, path
 
 
 urlpatterns = [
-path('list', views.MaintenanceLiftListView.as_view(),
+path('list/', views.MaintenanceLiftListView.as_view(),
          name='search'),
 
          

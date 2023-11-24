@@ -84,7 +84,7 @@ def maintenance_website(request,pk=None):
                                     remarks=remarks,
                                     date=date,
                                     check_image=check_image,
-                                     )
+                                    )
     
         message = {'detail': 'maint added successfully'}
         return JsonResponse(message,safe=False, status=status.HTTP_200_OK)

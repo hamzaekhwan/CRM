@@ -40,14 +40,37 @@ def login_mobile(request):
 
     return Response({'message': 'Please use a POST request to log in'}, status=400)
 
+@api_view(['POST'])
+def maintenance_mobile(request,pk=None):
+ 
+    
+    contract = get_object_or_404(Contract, id=pk)
+    maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
+    data=request.data
+    
+    type_name=data['type_name']
+    remarks=data['remarks']
+    date=data['date']
+    check_image=request.FILES.get('check_image')
+    
+    maintenance=Maintenance.objects.create(contract=contract,
+                                maintenance_lift=maintenance_lift,
+                                type_name=type_name,
+                                remarks=remarks,
+                                date=date,
+                                check_image=check_image,
+                                    )
+
+    message = {'detail': 'maint added successfully'}
+    return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
 
 @api_view(['POST','GET','PUT','DELETE'])
-@permission_classes([IsManager | IsManagerMaint | IsMaint])
-def maintenance(request,pk=None):
+@permission_classes([IsManager | IsManagerMaint])
+def maintenance_website(request,pk=None):
  
     if request.method == 'POST' :
         contract = get_object_or_404(Contract, id=pk)
-        maintenance_lift=MaintenanceLift.objects.get_or_create(contract=contract)
+        maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
         data=request.data
        
         type_name=data['type_name']

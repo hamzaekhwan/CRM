@@ -28,24 +28,31 @@ def maintenancelift(request,pk=None):
         handing_over_date=data['handing_over_date']
         number_of_visits_per_year=data['number_of_visits_per_year']
         free_maintenance_expiry_date=data['free_maintenance_expiry_date']
-
-        MaintenanceLift.objects.create(contract=contract,
-                                       
-                                        maintenance_contract_number=maintenance_contract_number,
-                                        maintenance_contract_start_date=maintenance_contract_start_date,
-                                        maintenance_contract_end_date=maintenance_contract_end_date,
-                                        maintenance_type=maintenance_type,
-                                        contract_value=contract_value,
-                                        spare_parts=spare_parts,
-                                        brand=brand,
-                                        villa_no=villa_no,
-                                        handing_over_date=handing_over_date,
-                                        number_of_visits_per_year=number_of_visits_per_year,
-                                        free_maintenance_expiry_date=free_maintenance_expiry_date)
-
         
-        message = {'detail': 'MaintenancesLift added successfully'}
-        return Response(message)
+        serializer=ContractSerializer(Contract,many=True)
+        if serializer.data.current_phase=="MAINTENANCE":
+            MaintenanceLift.objects.create(contract=contract,
+                                        
+                                            maintenance_contract_number=maintenance_contract_number,
+                                            maintenance_contract_start_date=maintenance_contract_start_date,
+                                            maintenance_contract_end_date=maintenance_contract_end_date,
+                                            maintenance_type=maintenance_type,
+                                            contract_value=contract_value,
+                                            spare_parts=spare_parts,
+                                            brand=brand,
+                                            villa_no=villa_no,
+                                            handing_over_date=handing_over_date,
+                                            number_of_visits_per_year=number_of_visits_per_year,
+                                            free_maintenance_expiry_date=free_maintenance_expiry_date)
+
+            
+            message = {'detail': 'MaintenancesLift added successfully'}
+            return Response(message)
+            
+        else :
+            message = {'detail': 'this contract is not in MAINTENANCE phase'}
+            return Response(message,status=status.HTTP_400_BAD_REQUEST)
+             
     if request.method == 'DELETE' :
         query=get_object_or_404(MaintenanceLift, id=pk)
         query.delete()

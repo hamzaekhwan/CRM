@@ -7,6 +7,33 @@ from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
 from CRMapp.authentications.permissions import *
+from django.contrib.auth import authenticate, login
+############# login for mobile
+@api_view(['POST'])
+def login_mobile(request):
+    if request.method == 'POST':
+        username_or_email = request.data.get('username')
+        password = request.data.get('password')
+
+        # Check if the username or email exists in the database
+        user = None
+        if '@' in username_or_email:
+            # If the input is an email
+            user = authenticate(request, email=username_or_email, password=password)
+        else:
+            # If the input is a username
+            user = authenticate(request, username=username_or_email, password=password)
+
+        # Check the success of authentication
+        userprofile=UserProfile.objects.get(user=user)
+        if user is not None and not userprofile.isEmp:
+            login(request, user)
+            return Response({'message': 'Login successful'},status=200)
+        else:
+            return Response({'message': 'Login failed, please check the entered information'},status=401)
+
+    return Response({'message': 'Please use a POST request to log in'},status=400)
+
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsMaint])

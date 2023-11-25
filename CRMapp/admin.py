@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import *
 from CRMapp.contracts.classes import ContractAdmin ,PhaseAdmin , NoteAdmin
 from CRMapp.clients.classes import ClientAdmin
-from CRMapp.maintenances.classes import MaintenanceAdmin
+
 
 
 
@@ -16,4 +16,4 @@ admin.site.register(MaintenanceLift)
 admin.site.register(Reminder)
 admin.site.register(Interest)
 admin.site.register(UserProfile)
-# admin.site.register(Maintenance,MaintenanceAdmin)
+admin.site.register(Maintenance)

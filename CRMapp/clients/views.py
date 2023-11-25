@@ -59,7 +59,7 @@ def client(request,pk=None):
         client=get_object_or_404(Client, id=pk)
         client.delete()
         message = {'detail': 'client deleted successfully'}
-        return Response(message) 
+        return Response(message,status=status.HTTP_204_NO_CONTENT)
     
     if request.method == 'PUT' :
         client=get_object_or_404(Client, id=pk)
@@ -141,7 +141,57 @@ def interest(request,pk=None):
             message = {'detail': 'client with this interest already exists'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
+@api_view(['GET', 'POST', 'DELETE'])
+@permission_classes([IsAuthenticated])  # You can customize permissions here
+def reminder(request, pk=None):
+    if request.method == 'GET':
+        if pk is not None:
+            reminder = get_object_or_404(Reminder, id=pk)
+            serializer = ReminderSerializer(reminder)
+            return Response(serializer.data)
+        else:
+            reminders = Reminder.objects.all()
+            serializer = ReminderSerializer(reminders, many=True)
+            return Response(serializer.data)
 
+    elif request.method == 'POST':
+        client = get_object_or_404(Client, id=pk)
+        data = request.data
+
+        # Assuming you have 'company_name' and 'inquiry' in your Reminder model
+        message = data.get('message')
+        reminder_datetime = data.get('reminder_datetime')
+        admin=request.user
+
+        reminder_exist = Reminder.objects.filter(client=client, reminder_datetime=reminder_datetime)
+        if not reminder_exist:
+            Reminder.objects.create(
+                client=client,
+                admin=admin,
+                message=message,
+                reminder_datetime=reminder_datetime,
+                notification_sent=False,
+            )
+
+            message = {'detail': 'reminder added successfully'}
+            return Response(message, status=status.HTTP_201_CREATED)
+        else:
+            message = {'detail': 'client with this reminder already exists'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+    # elif request.method == 'PUT':
+    #     reminder = get_object_or_404(Reminder, id=pk)
+    #     serializer = ReminderSerializer(reminder, data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    elif request.method == 'DELETE':
+        reminder = get_object_or_404(Reminder, id=pk)
+        reminder.delete()
+        message = {'detail': 'reminder deleted successfully'}
+        return Response(message,status=status.HTTP_204_NO_CONTENT)
 
 
             

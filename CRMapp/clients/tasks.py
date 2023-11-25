@@ -1,15 +1,21 @@
-from apscheduler.schedulers.background import BackgroundScheduler
-from django_apscheduler.jobstores import DjangoJobStore, register_events, register_job
+# tasks/tasks.py
+from django.utils import timezone
+from CRMapp.models import Reminder
+# from django.contrib.auth.models import User
 
-def print_hello():
-    print("Hello from the scheduled task!")
+def send_reminder_notifications():
+    now = timezone.now()
+    reminders_to_notify = Reminder.objects.filter(
+        reminder_datetime__lte=now,
+        notification_sent=False
+    )
 
-scheduler = BackgroundScheduler()
-scheduler.add_jobstore(DjangoJobStore(), "default")
+    for reminder in reminders_to_notify:
+        # Perform the logic to send the notification
+        # You might use a notification library, send an email, etc.
+        # For now, we'll just print a message
+        print(f"Sending reminder notification to {reminder.client.name}: {reminder.message}")
 
-@register_job(scheduler, "interval", minutes=1)
-def scheduled_job():
-    print_hello()
-
-register_events(scheduler)
-scheduler.start()
+        # Update the notification_sent field
+        reminder.notification_sent = True
+        reminder.save()

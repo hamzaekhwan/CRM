@@ -35,7 +35,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 # Application definition
 
 INSTALLED_APPS = [
-    # 'django_apscheduler',
+    'django_apscheduler',
     'CRMapp',
     'jazzmin',
     'django_filters',
@@ -49,12 +49,22 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'django_rest_passwordreset',
     'corsheaders',
- 
-    
-   
 ]
 
 SCHEDULER_ALLOWED_HOSTS = ["localhost", "127.0.0.1"] 
+# APSCHEDULER = {
+#     'jobs': [
+#         {
+#             'func': 'CRMapp.clients.tasks.send_reminder_notifications',
+#             'args': (),
+#             'trigger': 'interval',
+#             'seconds': 60,
+#         },
+#         # You can add more jobs here
+#     ],
+#     'timezone': 'Asia/Dubai',  # Set the timezone if you want to change it
+# }
+
 
 JAZZMIN_SETTINGS=JAZZMIN_SETTINGS
 
@@ -188,7 +198,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Dubai'
 
 USE_I18N = True
 

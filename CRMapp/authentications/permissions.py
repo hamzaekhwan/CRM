@@ -7,7 +7,7 @@ class IsEmp(permissions.BasePermission):
         # تحقق مما إذا كان المستخدم مصادق عليه
         is_authenticated = bool(request.user and request.user.is_authenticated)
 
-        # تحقق مما إذا كان لدى المستخدم isMaint = True في UserProfile
+        # تحقق مما إذا كان لدى المستخدم isEmp = True في UserProfile
         try:
             isEmp = request.user.userprofile.isEmp
         except UserProfile.DoesNotExist:
@@ -35,7 +35,7 @@ class IsManager(permissions.BasePermission):
         # تحقق مما إذا كان المستخدم مصادق عليه
         is_superuser = bool(request.user and request.user.is_superuser)
 
-        # تحقق مما إذا كان لدى المستخدم isMaint = True في UserProfile
+        # تحقق مما إذا كان لدى المستخدم isManager = True في UserProfile
         try:
             
             isManager = request.user.userprofile.isManager
@@ -58,3 +58,24 @@ class IsManagerMaint(permissions.BasePermission):
             isMangerMaint = False
 
         return is_superuser and isMangerMaint    
+    
+
+
+class ApiKeyPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        # المفتاح الثابت
+        static_api_key = "KIiCCxOfPUsM52BRdf7zJFeXKtfsT43iW2oU2L78MyhKJISRlidZcF8rw6LMyGzi"
+
+        # استخراج مفتاح الرمز المميز من رأس الطلبات
+        api_key = request.META.get('HTTP_AUTHORIZATION')
+
+        if api_key:
+            # تقطيع "Token " للحصول على القيمة الفعلية للمفتاح
+            api_key = api_key.split(' ')[-1]
+
+            # المقارنة مع المفتاح الثابت
+            if api_key == static_api_key:
+                return True
+
+        # إذا كان المفتاح غير صحيح أو لم يتم إرساله
+        return False

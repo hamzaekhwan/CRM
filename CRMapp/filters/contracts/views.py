@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
-    # permission_classes = [IsManager | IsManagerMaint | IsEmp]
+    permission_classes = [IsManager | IsManagerMaint | IsEmp | ApiKeyPermission ]
     queryset = Contract.objects.all()
     serializer_class = ContractSerializer
 

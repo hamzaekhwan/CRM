@@ -9,7 +9,9 @@ class CrmappConfig(AppConfig):
     name = 'CRMapp'
 
     def ready(self):
-        # from CRMapp.clients import tasks
-        # tasks.scheduled_job()
+        print("start Schedule .... ")
         import CRMapp.signals
+        from CRMapp.clients import updater
+        updater.start()
+       
         

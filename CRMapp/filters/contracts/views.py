@@ -87,7 +87,7 @@ class ContractMaintenanceListView(generics.ListAPIView):
 
 
 class ContractPhaseListView(generics.ListAPIView):    
-    permission_classes = [IsManager | IsManagerMaint | IsEmp]
+    permission_classes = [IsManager | IsManagerMaint | IsEmp ]
     queryset = Phase.objects.all()
     serializer_class = PhaseSerializer
 

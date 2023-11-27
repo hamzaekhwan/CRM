@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
-    permission_classes = [IsManager | IsManagerMaint | IsEmp | ApiKeyPermission ]
+    permission_classes = [IsManager | IsManagerMaint | IsEmp ]
     queryset = Contract.objects.all()
     serializer_class = ContractSerializer
 
@@ -40,8 +40,51 @@ class ContractListView(generics.ListAPIView):
             'results': ContractSerializer(queryset, many=True).data
         }
 
-        return JsonResponse(data)
+        return JsonResponse(data,safe=False)
            
+
+
+###for mobile search
+class ContractMaintenanceListView(generics.ListAPIView):
+    permission_classes = [IsManager | IsManagerMaint | IsEmp | ApiKeyPermission]
+    serializer_class = ContractSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+
+    search_fields = ['interest__client__name',
+                     'interest__client__mobile_phone',
+                     'interest__client__arabic_name',
+                     'interest__client__city',
+                     'interest__company_name',
+                     'ats',
+                     'location',]
+
+    def get_queryset(self):
+        # Only include contracts that have a corresponding MaintenanceLift
+        queryset = Contract.objects.filter(maintenancelift__isnull=False).distinct()
+
+        # Apply filters, search, and ordering
+        queryset = self.filter_queryset(queryset)
+
+        return queryset
+
+    def get(self, request, *args, **kwargs):
+        search_query = self.request.query_params.get('search', None)
+
+        if search_query is None or search_query.strip() == '':
+            # Return an empty array if the search query is empty
+            data = {'count': 0, 'results': []}
+        else:
+            # Proceed with regular search and filtering logic
+            queryset = self.get_queryset()
+            count = queryset.count()
+
+            data = {
+                'count': count,
+                'results': ContractSerializer(queryset, many=True).data
+            }
+
+        return JsonResponse(data, safe=False)
+
 
 class ContractPhaseListView(generics.ListAPIView):    
     permission_classes = [IsManager | IsManagerMaint | IsEmp]

@@ -41,6 +41,7 @@ def login_mobile(request):
     return Response({'message': 'Please use a POST request to log in'}, status=400)
 
 @api_view(['POST'])
+@permission_classes([ApiKeyPermission])
 def maintenance_mobile(request,pk=None):
  
     

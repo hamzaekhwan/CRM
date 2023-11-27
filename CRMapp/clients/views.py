@@ -8,7 +8,7 @@ from CRMapp.authentications.permissions import *
 from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
-
+from CRMapp.functions import export_to_csv , export_to_excel ,export_to_pdf
 
 
 @api_view(['POST','GET','PUT','DELETE'])
@@ -87,7 +87,7 @@ def client(request,pk=None):
     
  
 
-@api_view(['POST','GET','PUT'])
+@api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def interest(request,pk=None):
     if request.method == 'POST' :
@@ -140,7 +140,12 @@ def interest(request,pk=None):
         else:
             message = {'detail': 'client with this interest already exists'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
+    
+    if request.method == 'DELETE':
+        interest = get_object_or_404(Interest, id=pk)
+        interest.delete()
+        message = {'detail': 'interest deleted successfully'}
+        return Response(message,status=status.HTTP_204_NO_CONTENT)
 @api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])  # You can customize permissions here
 def reminder(request, pk=None):
@@ -195,4 +200,30 @@ def reminder(request, pk=None):
 
 
             
+# @api_view(['POST'])
+# def export_file(request, file_type):
+#     data=request.data
+#     client_ids=request.data.get('client_ids', [])
+#     queryset = Client.objects.filter(client__id__in=client_ids)
+
+#     if file_type == 'excel':
+#         excel_file = export_to_excel(queryset)
+#         response = Response(excel_file, content_type='application/ms-excel')
+#         response['Content-Disposition'] = 'attachment; filename="client_data.xlsx"'
+#         return response
+#     elif file_type == 'pdf':
+#         pdf_file = export_to_pdf(queryset)
+#         response = Response(pdf_file, content_type='application/pdf')
+#         response['Content-Disposition'] = 'attachment; filename="exported_data.pdf"'
+#         return response
+
+#     elif file_type == 'csv':
+#         csv_file = export_to_csv(queryset)
+#         response = Response(csv_file, content_type='text/csv')
+#         response['Content-Disposition'] = 'attachment; filename="exported_data.csv"'
+#         return response
+
+#     # في حالة عدم اختيار نوع الملف المدعوم
+#     return Response({'detail': 'Unsupported file type.'}, status=status.HTTP_400_BAD_REQUEST)
+        
 

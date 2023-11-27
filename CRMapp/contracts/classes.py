@@ -10,6 +10,14 @@ class PhaseInline(admin.TabularInline):
 class NoteInline(admin.TabularInline):
     model = Note
     extra = 1
+    
+class MaintenanceLiftInline(admin.TabularInline):
+    model = MaintenanceLift
+    extra = 1
+
+class MaintenanceInline(admin.TabularInline):
+    model = Maintenance
+    extra = 1
 
 class ContractInline(admin.TabularInline):
     model = Contract
@@ -21,7 +29,7 @@ class ContractAdmin(admin.ModelAdmin):
     list_filter= ['floors']
   
     actions = [export_to_excel,export_to_pdf,export_to_csv] 
-    inlines = [ PhaseInline, NoteInline]
+    inlines = [ PhaseInline, NoteInline,MaintenanceLiftInline,MaintenanceInline]
 
 class PhaseAdmin(admin.ModelAdmin):
     list_filter= ['Name','isActive',]

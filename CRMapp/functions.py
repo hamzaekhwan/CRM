@@ -42,7 +42,7 @@ def export_to_pdf(modeladmin, request, queryset):
     doc = SimpleDocTemplate(response, pagesize=letter)
     elements = []
 
-    data = []
+
     table_data = []
 
     # Get the field names

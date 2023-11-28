@@ -11,6 +11,7 @@ from django.contrib.auth import login
 from django.db.models import Q
 import shortuuid
 from CRMapp.functions import convert_base64
+
 ############# login for mobile
 @api_view(['POST'])
 def login_mobile(request):
@@ -53,7 +54,7 @@ def maintenance_mobile(request,pk=None):
     type_name=data['type_name']
     remarks=data['remarks']
     date=data['date']
-    code64=data('check_image')
+    code64=data['check_image']
     
     s = shortuuid.ShortUUID(alphabet="0123456789abcde")
     otp = s.random(length=12)

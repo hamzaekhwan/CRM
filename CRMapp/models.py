@@ -29,7 +29,7 @@ class Client(models.Model):
 
 
 class Interest(models.Model):
-    client=models.ForeignKey(Client,unique=False , on_delete=models.PROTECT)
+    client=models.ForeignKey(Client,unique=False , on_delete=models.CASCADE)
     inquiry=models.BooleanField("INQUIRY",default=True)
     company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
 
@@ -45,7 +45,7 @@ class Reminder(models.Model):
 
    
 class Contract(models.Model):
-    interest=models.ForeignKey(Interest,unique=False , on_delete=models.PROTECT)
+    interest=models.ForeignKey(Interest,unique=False , on_delete=models.CASCADE)
     
     ats=models.CharField("ATS", max_length=64)
     floors=models.CharField("floors", max_length=64)
@@ -58,7 +58,7 @@ class Contract(models.Model):
 
 
 class MaintenanceLift(models.Model): 
-    contract = models.OneToOneField(Contract, unique=True, on_delete=models.PROTECT, related_name='maintenancelift')
+    contract = models.OneToOneField(Contract, unique=True, on_delete=models.CASCADE, related_name='maintenancelift')
     maintenance_contract_number=models.CharField("Maintenance Contract Number", max_length=64)
     maintenance_contract_start_date=models.DateTimeField("Maintainance Contract Start")
     maintenance_contract_end_date=models.DateTimeField("Maintainance Contract End")
@@ -77,7 +77,7 @@ class MaintenanceLift(models.Model):
 
 
 class Phase(models.Model):
-    contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
+    contract=models.ForeignKey(Contract,unique=False , on_delete=models.CASCADE)
     Name=models.CharField("Name of Phase",choices=PHASES_NAME, max_length=64)
     isActive=models.BooleanField(default=False)
     start_date=models.DateTimeField("Phase Date Start")
@@ -89,7 +89,7 @@ class Phase(models.Model):
   
 class Note(models.Model)    :
     
-    contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
+    contract=models.ForeignKey(Contract,unique=False , on_delete=models.CASCADE)
     note=models.TextField("Notes",blank=True)
     attachment=models.FileField(blank=True)
     date=models.DateTimeField("Date of note")
@@ -101,8 +101,8 @@ class Note(models.Model)    :
 
   
 class Maintenance(models.Model):
-    contract=models.ForeignKey(Contract,unique=False , on_delete=models.PROTECT)
-    maintenance_lift=models.ForeignKey(MaintenanceLift,unique=False , on_delete=models.PROTECT)
+    contract=models.ForeignKey(Contract,unique=False , on_delete=models.CASCADE)
+    maintenance_lift=models.ForeignKey(MaintenanceLift,unique=False , on_delete=models.CASCADE)
     type_name= models.CharField("Type of Maintenance ",choices=MAINTENANCETYPE_CHOICES, max_length=255)
     remarks=models.TextField()
     check_image=models.FileField(blank=True) 

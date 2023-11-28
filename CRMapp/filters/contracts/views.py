@@ -46,7 +46,7 @@ class ContractListView(generics.ListAPIView):
 
 ###for mobile search
 class ContractMaintenanceListView(generics.ListAPIView):
-    permission_classes = [IsManager | IsManagerMaint | IsEmp | ApiKeyPermission]
+    permission_classes = [ApiKeyPermission]
     serializer_class = ContractSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 

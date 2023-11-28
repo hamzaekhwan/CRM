@@ -9,7 +9,8 @@ from django.shortcuts import get_object_or_404
 from CRMapp.authentications.permissions import *
 from django.contrib.auth import login
 from django.db.models import Q
-
+import shortuuid
+from CRMapp.functions import convert_base64
 ############# login for mobile
 @api_view(['POST'])
 def login_mobile(request):
@@ -52,14 +53,18 @@ def maintenance_mobile(request,pk=None):
     type_name=data['type_name']
     remarks=data['remarks']
     date=data['date']
-    check_image=request.FILES.get('check_image')
+    code64=data('check_image')
     
+    s = shortuuid.ShortUUID(alphabet="0123456789abcde")
+    otp = s.random(length=12)
+    image=convert_base64(code64,data['type_name'],otp)
+
     maintenance=Maintenance.objects.create(contract=contract,
                                 maintenance_lift=maintenance_lift,
                                 type_name=type_name,
                                 remarks=remarks,
                                 date=date,
-                                check_image=check_image,
+                                check_image=image,
                                     )
 
     message = {'detail': 'maint added successfully'}

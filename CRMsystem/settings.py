@@ -81,17 +81,17 @@ REST_FRAMEWORK = {
 }
 
 
-
+SIGNING_KEY="RVBS8NoJNCijz+w/wzBvdJ1BZx7hnbzCThPxMDJyAIBx/dXZUNIgk9qMc8AfUHAy+WxSfw7uN0Y9HSfQQRaUr4d+4i/ag8r45pekrk0fZ+5n8RnmXgcZR9PswbIyQmXMY8y2Uxq2uizKS0Gu2IeKyBzGe3urXF5vhcYjWB+cO0UpsXFouSWkapSD0q6NNDgBPEzsgnsXY1niz1ItrbqJVe5y81ZkSCr/uvTPECi1lt/V2FBd/GF9LVDRJAiwaCXC"
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=180),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=365),
+    'ACCESS_TOKEN_LIFETIME': timedelta(weeks=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(weeks=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,
-    'UPDATE_LAST_LOGIN': False,
+    'UPDATE_LAST_LOGIN': True,
 
     'ALGORITHM': 'HS256',
-    'SIGNING_KEY': SECRET_KEY,
+    'SIGNING_KEY': SIGNING_KEY,
     'VERIFYING_KEY': None,
     'AUDIENCE': None,
     'ISSUER': None,
@@ -108,8 +108,8 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
 
     'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
-    'SLIDING_TOKEN_LIFETIME': timedelta(days=180),
-    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=365),
+    'SLIDING_TOKEN_LIFETIME': timedelta(weeks=1),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(weeks=1),
 }
 
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME=1/12

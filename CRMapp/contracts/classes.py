@@ -39,6 +39,6 @@ class PhaseAdmin(admin.ModelAdmin):
 
 class NoteAdmin(admin.ModelAdmin):
     actions = [export_to_excel,export_to_pdf,export_to_csv] 
-    list_display = ['contract','date']
+    list_display = ['contract']
     search_fields=['contract']
 

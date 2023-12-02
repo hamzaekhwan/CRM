@@ -100,14 +100,25 @@ class Note(models.Model)    :
    ###########################################################\
 
   
+ 
+
 class Maintenance(models.Model):
-    contract=models.ForeignKey(Contract,unique=False , on_delete=models.CASCADE)
-    maintenance_lift=models.ForeignKey(MaintenanceLift,unique=False , on_delete=models.CASCADE)
-    type_name= models.CharField("Type of Maintenance ",choices=MAINTENANCETYPE_CHOICES, max_length=255)
-    remarks=models.TextField()
-    check_image=models.FileField(blank=True) 
-    date=models.DateField("Date of remark")
+    contract = models.ForeignKey(Contract, unique=False, on_delete=models.CASCADE)
+    maintenance_lift = models.ForeignKey(MaintenanceLift, unique=False, on_delete=models.CASCADE)
+    type_name = models.CharField("Type of Maintenance", choices=MAINTENANCETYPE_CHOICES, max_length=255)
+    remarks = models.TextField()
+    technician = models.CharField("Name Of technician", max_length=255)
+    helper1 = models.CharField("Name Of helper1", max_length=255)
+    helper2 = models.CharField("Name Of helper1", max_length=255)
+    date = models.DateField("Date of remark")
 
     def __str__(self):
-        return str(self.contract) + " " + str(self.type_name ) 
+        return str(self.contract) + " " + str(self.type_name)
+
     
+class CheckImage(models.Model):
+    maintenance = models.ForeignKey(Maintenance, on_delete=models.CASCADE)
+    image = models.FileField()
+
+    def __str__(self):
+        return f"Image for {self.maintenance}"    

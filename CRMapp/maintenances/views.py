@@ -11,7 +11,7 @@ from django.contrib.auth import login
 from django.db.models import Q
 import shortuuid
 from CRMapp.functions import convert_base64
-
+from CRMapp.authentications.serializers import UserSerializer
 ############# login for mobile
 @api_view(['POST'])
 def login_mobile(request):
@@ -34,7 +34,9 @@ def login_mobile(request):
 
             if not userprofile.isEmp:
                 login(request, user)
-                return Response({'message': 'Login successful'}, status=200)
+                serializer=UserSerializer(user,many=False)
+                #Login successful
+                return Response({'message': 'Login successful' , "result":serializer.data }, status=200)
             else:
                 return Response({'message': 'Login failed, user is an employee'}, status=401)
         else:
@@ -51,22 +53,35 @@ def maintenance_mobile(request,pk=None):
     maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
     data=request.data
     
+    user_id=data['user_id']
+    helper1=data['helper1']
+    helper2=data['helper2']
     type_name=data['type_name']
     remarks=data['remarks']
     date=data['date']
-    code64=data['check_image']
-    
+    code64_list = data.getlist('check_images')
+
+    technician=User.objects.get(id=user_id).first_name
+
     s = shortuuid.ShortUUID(alphabet="0123456789abcde")
-    otp = s.random(length=12)
-    image=convert_base64(code64,data['type_name'],otp)
+   
 
     maintenance=Maintenance.objects.create(contract=contract,
                                 maintenance_lift=maintenance_lift,
                                 type_name=type_name,
                                 remarks=remarks,
                                 date=date,
-                                check_image=image,
+                                technician=technician,
+                                helper1=helper1,
+                                helper2=helper2
                                     )
+    
+
+    for code64 in code64_list:
+        otp = s.random(length=12)
+        image = convert_base64(code64, data['type_name'], otp)
+        CheckImage.objects.create(maintenance=maintenance, image=image)
+       
 
     message = {'detail': 'maint added successfully'}
     return JsonResponse(message,safe=False, status=status.HTTP_200_OK)

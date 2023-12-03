@@ -26,7 +26,7 @@ class ContractSerializer(serializers.ModelSerializer):
     notes=serializers.SerializerMethodField()
     current_phase=serializers.SerializerMethodField()
     interest=serializers.SerializerMethodField()
-    # maintenance=serializers.SerializerMethodField()
+    villa_no=serializers.SerializerMethodField()
     class Meta:
         model = Contract
         fields = [
@@ -40,7 +40,7 @@ class ContractSerializer(serializers.ModelSerializer):
                 'location',
                 'notes',
                 'current_phase',
-                # 'maintenance',
+                'villa_no',
                   
         ]
     
@@ -67,11 +67,16 @@ class ContractSerializer(serializers.ModelSerializer):
             
             return ""
     
-    # def get_maintenance(self, obj):
-    #     contract=Contract.objects.get(id=obj.id)
-    #     query=MaintenanceLift.objects.filter(contract=contract)
-    #     serializer=ContractMaintenanceSerializer(query,many=True)
-    #     return serializer.data
+    
+    def get_villa_no(self, obj):
+        contract=Contract.objects.get(id=obj.id)
+        query=MaintenanceLift.objects.filter(contract=contract)
+        if query.exists() : 
+
+            villa_no=query[0].villa_no
+            return villa_no
+        else : 
+            return ""
 
 
 

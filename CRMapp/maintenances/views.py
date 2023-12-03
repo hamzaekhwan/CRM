@@ -98,15 +98,24 @@ def maintenance_website(request,pk=None):
         type_name=data['type_name']
         remarks=data['remarks']
         date=data['date']
-        check_image=request.FILES.get('check_image')
+        technician=data['technician']
+        helper1=data['helper1']
+        helper2=data['helper2']
+        check_images=request.FILES.getlist('check_images')
        
         maintenance=Maintenance.objects.create(contract=contract,
                                     maintenance_lift=maintenance_lift,
                                     type_name=type_name,
                                     remarks=remarks,
                                     date=date,
-                                    check_image=check_image,
+                                    technician=technician,
+                                    helper1=helper1,
+                                    helper2=helper2
                                     )
+        
+        for image in check_images:
+       
+            CheckImage.objects.create(maintenance=maintenance, image=image)
     
         message = {'detail': 'maint added successfully'}
         return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
@@ -137,9 +146,12 @@ def maintenance_website(request,pk=None):
         maintenance_obj.remarks = data.get('remarks', maintenance_obj.remarks)
         maintenance_obj.date = data.get('date', maintenance_obj.date)
 
-        check_image = request.FILES.get('check_image', None)
-        if check_image is not None:
-            maintenance_obj.check_image = check_image
+        maintenance_obj.technician = data.get('technician', maintenance_obj.technician)
+        maintenance_obj.helper1 = data.get('helper1', maintenance_obj.helper1)
+        maintenance_obj.helper2 = data.get('helper2', maintenance_obj.helper2)
+
+
+
 
        
         
@@ -150,3 +162,36 @@ def maintenance_website(request,pk=None):
         message = {'detail': 'Maintenance updated successfully'}
         return Response(message, status=status.HTTP_200_OK)
            
+        
+@api_view(['POST','GET','DELETE'])
+@permission_classes([IsManager | IsManagerMaint])
+def image(request,pk=None):
+    if request.method == 'POST' :
+        maintenance = get_object_or_404(Maintenance, id=pk)
+        data=request.data
+
+        check_images=request.FILES.getlist('check_images')
+        
+        for image in check_images:
+       
+            CheckImage.objects.create(maintenance=maintenance, image=image)
+
+        message = {'detail': 'image added successfully'}
+        return JsonResponse(message,safe=False, status=status.HTTP_200_OK)    
+    
+    if request.method == 'DELETE':
+        check_image = get_object_or_404(CheckImage, id=pk)
+
+        check_image.delete()
+
+        message = {'detail': 'Image deleted successfully'}
+        return JsonResponse(message, safe=False, status=status.HTTP_200_OK)
+
+    
+    if request.method == 'GET' :  
+       
+        check_image = get_object_or_404(CheckImage, id=pk)
+        
+        serializer = CheckImageSerializer(check_image)
+        return JsonResponse(serializer.data,safe=False)  
+

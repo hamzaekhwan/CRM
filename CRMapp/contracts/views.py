@@ -20,11 +20,11 @@ def contract(request,pk=None):
         
 
         ats=data['ats']
-
+        interest_id=data['interest_id']
         contract_exists = Contract.objects.filter(ats=ats).exists()
         if not contract_exists:
 
-            interest=get_object_or_404(Interest, id=pk)
+            interest=get_object_or_404(Interest, id=interest_id)
 
 
             lift_type=data['lift_type']
@@ -89,8 +89,8 @@ def contract(request,pk=None):
 
         message = {'detail': 'contract updated successfully'}
         return Response(message, status=status.HTTP_200_OK)
-        
-
+    
+               
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def contract_phases_by_id(request,pk):

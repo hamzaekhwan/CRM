@@ -30,7 +30,9 @@ def check_interest_exists(sender, instance, **kwargs):
 @receiver(pre_save, sender=Phase)
 def check_duplicate_phase(sender, instance, **kwargs):
     if instance.isActive:
-       
+        
+        # contract=Contract.objects.get(id=instance.contract)
+        # contract.interest.inquiry=False
         Phase.objects.filter(contract=instance.contract, isActive=True).exclude(id=instance.id).update(isActive=False)
 
     existing_phase = Phase.objects.filter(

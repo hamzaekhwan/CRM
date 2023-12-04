@@ -29,8 +29,10 @@ def maintenancelift(request,pk=None):
         number_of_visits_per_year=data['number_of_visits_per_year']
         free_maintenance_expiry_date=data['free_maintenance_expiry_date']
         
-        serializer=ContractSerializer(Contract,many=True)
-        if serializer.data.current_phase=="MAINTENANCE":
+        # serializer=ContractSerializer(Contract,many=True)
+        # if serializer.data.current_phase=="MAINTENANCE":
+        maintenancemift_exist=MaintenanceLift.objects.filter(contract=contract).exists()
+        if maintenancemift_exist == False :
             MaintenanceLift.objects.create(contract=contract,
                                         
                                             maintenance_contract_number=maintenance_contract_number,
@@ -45,12 +47,12 @@ def maintenancelift(request,pk=None):
                                             number_of_visits_per_year=number_of_visits_per_year,
                                             free_maintenance_expiry_date=free_maintenance_expiry_date)
 
-            
+        
             message = {'detail': 'MaintenancesLift added successfully'}
             return Response(message)
-            
+        
         else :
-            message = {'detail': 'this contract is not in MAINTENANCE phase'}
+            message = {'detail': 'this contract already has a MaintenancesLift '}
             return Response(message,status=status.HTTP_400_BAD_REQUEST)
              
     if request.method == 'DELETE' :
@@ -90,3 +92,4 @@ def maintenancelift(request,pk=None):
             query = MaintenanceLift.objects.all()
             serializer = MaintenanceLiftSerializer(query, many=True)
             return Response(serializer.data)
+

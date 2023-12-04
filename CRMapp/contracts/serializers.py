@@ -81,5 +81,3 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
 
-
-

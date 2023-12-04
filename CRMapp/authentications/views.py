@@ -129,12 +129,12 @@ def admin(request,pk=None):
         user_obj = get_object_or_404(User, id=pk)
         data = request.data
 
-        email = data.get('email', user_obj.email)
-        username = data.get('username', user_obj.username)
+        # email = data.get('email', user_obj.email)
+        # username = data.get('username', user_obj.username)
         name = data.get('name', user_obj.first_name)
 
-        user_obj.email = email
-        user_obj.username = username
+        # user_obj.email = email
+        # user_obj.username = username
         user_obj.first_name = name
 
         profile=UserProfile.objects.get(user=user_obj)

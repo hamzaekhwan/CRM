@@ -122,3 +122,10 @@ class CheckImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.maintenance}"    
+    
+class PdfMaintenanceContract(models.Model):
+    maintenance = models.OneToOneField(Maintenance, on_delete=models.CASCADE)
+    file = models.FileField(blank=True)
+
+    def __str__(self):
+        return f"Pdf Maintenance Contract {self.maintenance}"

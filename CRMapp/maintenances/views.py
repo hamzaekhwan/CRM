@@ -12,6 +12,7 @@ from django.db.models import Q
 import shortuuid
 from CRMapp.functions import convert_base64
 from CRMapp.authentications.serializers import UserSerializer
+from CRMapp.maintenances.pdfs_creator import create_report
 ############# login for mobile
 @api_view(['POST'])
 def login_mobile(request):
@@ -46,45 +47,76 @@ def login_mobile(request):
 
 @api_view(['POST'])
 @permission_classes([ApiKeyPermission])
-def maintenance_mobile(request,pk=None):
- 
-    
+def maintenance_mobile(request, pk=None):
     contract = get_object_or_404(Contract, id=pk)
-    maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
-    data=request.data
+    maintenance_lift = get_object_or_404(MaintenanceLift, contract=contract)
+
+    client_name = contract.interest.client.name    
+    client_mobile_phone = contract.interest.client.mobile_phone 
+    client_city = contract.interest.client.city 
+    ats = contract.ats
     
-    user_id=data['user_id']
-    helper1=data['helper1']
-    helper2=data['helper2']
-    type_name=data['type_name']
-    remarks=data['remarks']
-    date=data['date']
-    code64_list = data.getlist('check_images')
+    data = request.data
+    
+    user_id = data['user_id']
+    technician = User.objects.get(id=user_id).first_name
 
-    technician=User.objects.get(id=user_id).first_name
-
+    helper1 = data['helper1']
+    helper2 = data['helper2']
+    type_name = data['type_name']
+    remarks = data['remarks']
+    date = data['date']
+    
+    # Signatures section
+    signatures_base64 = data["signatures"]
+    signatures = [convert_base64(signature, type_name, otp) for signature, otp in zip(signatures_base64, [1, 2, 3])]
+    
+    # Check Images
+    code64_list = data["check_images"]
+    
+    # Create Maintenance instance
+    maintenance = Maintenance.objects.create(
+        contract=contract,
+        maintenance_lift=maintenance_lift,
+        type_name=type_name,
+        remarks=remarks,
+        date=date,
+        technician=technician,
+        helper1=helper1,
+        helper2=helper2
+    )
+    
+    # Create Check Images
     s = shortuuid.ShortUUID(alphabet="0123456789abcde")
-   
-
-    maintenance=Maintenance.objects.create(contract=contract,
-                                maintenance_lift=maintenance_lift,
-                                type_name=type_name,
-                                remarks=remarks,
-                                date=date,
-                                technician=technician,
-                                helper1=helper1,
-                                helper2=helper2
-                                    )
-    
-
     for code64 in code64_list:
         otp = s.random(length=12)
-        image = convert_base64(code64, data['type_name'], otp)
+        image = convert_base64(code64, type_name, otp)
         CheckImage.objects.create(maintenance=maintenance, image=image)
-       
+    
+    # Create PDF Maintenance Contract
+    pdf_maintenance_contract = PdfMaintenanceContract.objects.create(maintenance=maintenance)
+    report_number = pdf_maintenance_contract.id
+    
+    
+    sections_data=data['sections_data']
+    pdf_file = create_report(
+        sections_data,
+        date,
+        report_number,
+        client_city,
+        ats,
+        client_name,
+        client_mobile_phone,
+        remarks,
+        signatures,
+        output_file="{}_{}maintenance_report.pdf".format(client_name, otp)
+    )
+    
+    pdf_maintenance_contract.file = pdf_file
+    pdf_maintenance_contract.save()
 
-    message = {'detail': 'maint added successfully'}
-    return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
+    message = {'detail': 'Maintenance added successfully'}
+    return Response(message, status=status.HTTP_200_OK)
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint])

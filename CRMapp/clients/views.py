@@ -143,9 +143,17 @@ def interest(request,pk=None):
     
     if request.method == 'DELETE':
         interest = get_object_or_404(Interest, id=pk)
+        
+        # Check if this is the last interest associated with the client
+        client = interest.client
+        if client.interest_set.count() == 1:
+            message = {'detail': 'Cannot delete the last interest associated with the client.'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        
+        # If not the last interest, proceed with deletion
         interest.delete()
-        message = {'detail': 'interest deleted successfully'}
-        return Response(message,status=status.HTTP_204_NO_CONTENT)
+        message = {'detail': 'Interest deleted successfully'}
+        return Response(message, status=status.HTTP_204_NO_CONTENT)
 @api_view(['GET', 'POST', 'DELETE'])
 @permission_classes([IsAuthenticated])  # You can customize permissions here
 def reminder(request, pk=None):

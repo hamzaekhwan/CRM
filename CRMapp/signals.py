@@ -6,8 +6,8 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from .models import *
 
-
-
+from django.db.models.signals import pre_delete
+from django.core.exceptions import ValidationError
 
 
 
@@ -27,12 +27,21 @@ def check_interest_exists(sender, instance, **kwargs):
         raise Exception("Client with this interest already exists")
 
 
+@receiver(pre_save, sender=Contract)
+def end_inquiry_phase(sender, instance, **kwargs):
+   
+        
+    instance.interest.inquiry = False
+    instance.interest.save()
+        
+
+
+
 @receiver(pre_save, sender=Phase)
 def check_duplicate_phase(sender, instance, **kwargs):
     if instance.isActive:
         
-        # contract=Contract.objects.get(id=instance.contract)
-        # contract.interest.inquiry=False
+        
         Phase.objects.filter(contract=instance.contract, isActive=True).exclude(id=instance.id).update(isActive=False)
 
     existing_phase = Phase.objects.filter(

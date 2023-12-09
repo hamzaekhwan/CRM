@@ -62,10 +62,11 @@ class ContractSerializer(serializers.ModelSerializer):
         contract=Contract.objects.get(id=obj.id)
         current_phase=Phase.objects.filter(contract=contract,isActive=True)
         if current_phase.exists() :
-            return current_phase.first().Name
+            serializer=PhaseSerializer(current_phase , many=True)
+            return serializer.data
         else: 
-            
-            return ""
+            a=[]
+            return a
     
     
     def get_villa_no(self, obj):

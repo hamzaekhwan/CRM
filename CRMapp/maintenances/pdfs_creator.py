@@ -1,6 +1,5 @@
 
-from datetime import datetime
-from tabulate import tabulate
+
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 from reportlab.lib.styles import getSampleStyleSheet
@@ -212,7 +211,7 @@ def create_report(data,
 
     draw_signatures(pdf_canvas,signatures)
 
-    pdf_canvas.save()
+    return pdf_canvas
 
 if __name__ == "__main__":
     data = {

@@ -68,7 +68,7 @@ def maintenance_mobile(request, pk=None):
     date = data['date']
     
     # Signatures section
-    signatures_base64 = data["signatures"]
+    signatures_base64 = data["signatures"]  ## 0-TECHNICIAN Signature 1-CLIENT Signature  2-SUPERVISOR Signature
     signatures = [convert_base64(signature, type_name, otp) for signature, otp in zip(signatures_base64, [1, 2, 3])]
     
     # Check Images
@@ -124,6 +124,11 @@ def maintenance_website(request,pk=None):
  
     if request.method == 'POST' :
         contract = get_object_or_404(Contract, id=pk)
+        client_name = contract.interest.client.name    
+        client_mobile_phone = contract.interest.client.mobile_phone 
+        client_city = contract.interest.client.city 
+        ats = contract.ats
+
         maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
         data=request.data
        
@@ -134,6 +139,8 @@ def maintenance_website(request,pk=None):
         helper1=data['helper1']
         helper2=data['helper2']
         check_images=request.FILES.getlist('check_images')
+
+        signatures=request.FILES.getlist('signatures') ## 0-TECHNICIAN Signature 1-CLIENT Signature  2-SUPERVISOR Signature
        
         maintenance=Maintenance.objects.create(contract=contract,
                                     maintenance_lift=maintenance_lift,
@@ -148,6 +155,31 @@ def maintenance_website(request,pk=None):
         for image in check_images:
        
             CheckImage.objects.create(maintenance=maintenance, image=image)
+
+        pdf_maintenance_contract = PdfMaintenanceContract.objects.create(maintenance=maintenance)
+        report_number = pdf_maintenance_contract.id
+        
+        s = shortuuid.ShortUUID(alphabet="0123456789abcde")
+        otp = s.random(length=12)
+        
+        sections_data=data['sections_data']
+        pdf_file = create_report(
+            sections_data,
+            date,
+            report_number,
+            client_city,
+            ats,
+            client_name,
+            client_mobile_phone,
+            remarks,
+            signatures,
+            output_file="{}_{}maintenance_report.pdf".format(client_name, otp)
+        )
+        
+        pdf_maintenance_contract.file = pdf_file
+        pdf_maintenance_contract.save()
+
+ 
     
         message = {'detail': 'maint added successfully'}
         return JsonResponse(message,safe=False, status=status.HTTP_200_OK)

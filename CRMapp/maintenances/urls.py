@@ -6,6 +6,7 @@ from django.urls import include, path
 urlpatterns = [
     path('maintenance/', views.maintenance_website, name='maintenance'),    
     path('maintenance/<str:pk>/', views.maintenance_website, name='specific_maintenance'),
+    path('get_maintenances/', views.getmaintenances, name='getmaintenances pagination'), 
 
     path('image/<str:pk>/', views.image, name='image_for_maintenance'),
   

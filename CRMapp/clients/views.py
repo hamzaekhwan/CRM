@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
 from CRMapp.functions import export_to_csv , export_to_excel ,export_to_pdf
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
@@ -207,6 +207,35 @@ def reminder(request, pk=None):
         return Response(message,status=status.HTTP_204_NO_CONTENT)
 
 
+
+@api_view(['GET'])
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
+def getclients(request):
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    clients = Client.objects.filter(
+        name__icontains=query).order_by('-date')
+
+    page = request.query_params.get('page')
+    paginator = Paginator(clients, 10)
+
+    try:
+        clients = paginator.page(page)
+    except PageNotAnInteger:
+        clients = paginator.page(1)
+    except EmptyPage:
+        clients = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    print('Page:', page)
+    serializer = ClientSerializer(clients, many=True)
+    return Response({'clients': serializer.data, 'page': page, 'pages': paginator.num_pages})
             
 # @api_view(['POST'])
 # def export_file(request, file_type):

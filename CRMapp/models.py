@@ -48,10 +48,10 @@ class Contract(models.Model):
     interest=models.ForeignKey(Interest,unique=False , on_delete=models.CASCADE)
     
     ats=models.CharField("ATS", max_length=64)
-    floors=models.CharField("floors", max_length=64)
-    lift_type=models.CharField("Type", max_length=64)
-    location=models.URLField('Location')
-    size=models.IntegerField("Size")
+    floors=models.CharField("floors", max_length=64,blank=True)
+    lift_type=models.CharField("Type", max_length=64,blank=True)
+    location=models.URLField('Location',blank=True)
+    size=models.IntegerField("Size",blank=True)
 
     def __str__(self):
         return str(self.ats ) 
@@ -108,8 +108,8 @@ class Maintenance(models.Model):
     type_name = models.CharField("Type of Maintenance", choices=MAINTENANCETYPE_CHOICES, max_length=255)
     remarks = models.TextField()
     technician = models.CharField("Name Of technician", max_length=255)
-    helper1 = models.CharField("Name Of helper1", max_length=255)
-    helper2 = models.CharField("Name Of helper1", max_length=255)
+    helper1 = models.CharField("Name Of helper1", max_length=255,blank=True)
+    helper2 = models.CharField("Name Of helper1", max_length=255,blank=True)
     date = models.DateField("Date of remark")
 
     def __str__(self):

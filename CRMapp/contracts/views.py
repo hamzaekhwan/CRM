@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from CRMapp.authentications.permissions import *
 from CRMapp.maintenances.serializers import MaintenanceSerializer
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
@@ -90,6 +91,34 @@ def contract(request,pk=None):
         message = {'detail': 'contract updated successfully'}
         return Response(message, status=status.HTTP_200_OK)
     
+@api_view(['GET'])  ## pagination api 
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
+def getcontracts(request):
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    contracts = Contract.objects.filter(
+        ats__icontains=query)
+
+    page = request.query_params.get('page')
+    paginator = Paginator(contracts, 10)
+
+    try:
+        contracts = paginator.page(page)
+    except PageNotAnInteger:
+        contracts = paginator.page(1)
+    except EmptyPage:
+        contracts = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    
+    serializer = ContractSerializer(contracts, many=True)
+    return Response({'contracts': serializer.data, 'page': page, 'pages': paginator.num_pages})
                
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
@@ -196,6 +225,34 @@ def note(request,pk=None):
             serializer = NoteSerializer(notes, many=True)
             return Response(serializer.data)
 
+@api_view(['GET'])  ## pagination api 
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
+def getnotes(request):  
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    notes = Note.objects.filter(
+        ats__icontains=query)
+
+    page = request.query_params.get('page')
+    paginator = Paginator(notes, 10)
+
+    try:
+        notes = paginator.page(page)
+    except PageNotAnInteger:
+        notes = paginator.page(1)
+    except EmptyPage:
+        notes = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    
+    serializer = NoteSerializer(notes, many=True)
+    return Response({'notes': serializer.data, 'page': page, 'pages': paginator.num_pages})
 #################################################################################
 
 
@@ -257,6 +314,35 @@ def phase(request,pk=None):
             phases = Phase.objects.all()
             serializer = PhaseSerializer(phases, many=True)
             return Response(serializer.data)
+
+@api_view(['GET'])  ## pagination api 
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
+def getphases(request):  
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    phases = Phase.objects.filter(
+        ats__icontains=query)
+
+    page = request.query_params.get('page')
+    paginator = Paginator(phases, 10)
+
+    try:
+        phases = paginator.page(page)
+    except PageNotAnInteger:
+        phases = paginator.page(1)
+    except EmptyPage:
+        phases = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    
+    serializer = PhaseSerializer(phases, many=True)
+    return Response({'notes': serializer.data, 'page': page, 'pages': paginator.num_pages})
 
 @api_view(['PUT'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])

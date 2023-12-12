@@ -6,7 +6,7 @@ from rest_framework.permissions import *
 from CRMapp.models import *
 from django.shortcuts import get_object_or_404
 from CRMapp.authentications.permissions import *
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 @api_view(['POST','PUT','DELETE','GET'])
 @permission_classes([IsManager | IsManagerMaint ])
 def maintenancelift(request,pk=None):
@@ -93,3 +93,31 @@ def maintenancelift(request,pk=None):
             serializer = MaintenanceLiftSerializer(query, many=True)
             return Response(serializer.data)
 
+@api_view(['GET']) #pagination api
+@permission_classes([IsManager | IsManagerMaint])
+def getmaintenancelifts(request):
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    maintenancelifts = Maintenance.objects.filter(
+        ats__icontains=query)
+
+    page = request.query_params.get('page')
+    paginator = Paginator(maintenancelifts, 10)
+
+    try:
+        maintenancelifts = paginator.page(page)
+    except PageNotAnInteger:
+        maintenancelifts = paginator.page(1)
+    except EmptyPage:
+        maintenancelifts = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    
+    serializer = MaintenanceLiftSerializer(maintenancelifts, many=True)
+    return Response({'maintenancelifts': serializer.data, 'page': page, 'pages': paginator.num_pages})

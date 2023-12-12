@@ -13,6 +13,9 @@ import shortuuid
 from CRMapp.functions import convert_base64
 from CRMapp.authentications.serializers import UserSerializer
 from CRMapp.maintenances.pdfs_creator import create_report
+from io import BytesIO
+from django.utils import timezone
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 ############# login for mobile
 @api_view(['POST'])
 def login_mobile(request):
@@ -68,8 +71,9 @@ def maintenance_mobile(request, pk=None):
     date = data['date']
     
     # Signatures section
-    signatures_base64 = data["signatures"]  ## 0-TECHNICIAN Signature 1-CLIENT Signature  2-SUPERVISOR Signature
-    signatures = [convert_base64(signature, type_name, otp) for signature, otp in zip(signatures_base64, [1, 2, 3])]
+  
+    signatures_base64 = data["signatures"]  ## 0-CLIENT NAME 1- client signature 2- TECHNICIAN Signature 
+    
     
     # Check Images
     code64_list = data["check_images"]
@@ -87,11 +91,12 @@ def maintenance_mobile(request, pk=None):
     )
     
     # Create Check Images
-    s = shortuuid.ShortUUID(alphabet="0123456789abcde")
-    for code64 in code64_list:
-        otp = s.random(length=12)
-        image = convert_base64(code64, type_name, otp)
-        CheckImage.objects.create(maintenance=maintenance, image=image)
+    if len(code64_list)!=0 :
+        s = shortuuid.ShortUUID(alphabet="0123456789abcde")
+        for code64 in code64_list:
+            otp = s.random(length=12)
+            image = convert_base64(code64, type_name, otp)
+            CheckImage.objects.create(maintenance=maintenance, image=image)
     
     # Create PDF Maintenance Contract
     pdf_maintenance_contract = PdfMaintenanceContract.objects.create(maintenance=maintenance)
@@ -99,21 +104,24 @@ def maintenance_mobile(request, pk=None):
     
     
     sections_data=data['sections_data']
+
     pdf_file = create_report(
         sections_data,
         date,
-        report_number,
+        str(report_number),
         client_city,
         ats,
         client_name,
         client_mobile_phone,
         remarks,
-        signatures,
-        output_file="{}_{}maintenance_report.pdf".format(client_name, otp)
+        signatures_base64,
     )
     
-    pdf_maintenance_contract.file = pdf_file
-    pdf_maintenance_contract.save()
+    buffer = BytesIO(pdf_file)
+
+    timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+    unique_filename = "{}_{}maintenance_report.pdf".format(client_name, timestamp)
+    pdf_maintenance_contract.file.save(unique_filename, buffer)
 
     message = {'detail': 'Maintenance added successfully'}
     return Response(message, status=status.HTTP_200_OK)
@@ -225,7 +233,35 @@ def maintenance_website(request,pk=None):
 
         message = {'detail': 'Maintenance updated successfully'}
         return Response(message, status=status.HTTP_200_OK)
-           
+
+@api_view(['GET']) #pagination api
+@permission_classes([IsManager | IsManagerMaint])
+def getmaintenances(request):
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    maintenances = Maintenance.objects.filter(
+        ats__icontains=query)
+
+    page = request.query_params.get('page')
+    paginator = Paginator(maintenances, 10)
+
+    try:
+        maintenances = paginator.page(page)
+    except PageNotAnInteger:
+        maintenances = paginator.page(1)
+    except EmptyPage:
+        maintenances = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    
+    serializer = MaintenanceSerializer(maintenances, many=True)
+    return Response({'maintenances': serializer.data, 'page': page, 'pages': paginator.num_pages})
         
 @api_view(['POST','GET','DELETE'])
 @permission_classes([IsManager | IsManagerMaint])

@@ -8,10 +8,10 @@ from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from CRMapp.authentications.permissions import *
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 class UserListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint ]
-    queryset = User.objects.all()
+    users = User.objects.all()
     serializer_class = UserSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -27,14 +27,21 @@ class UserListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
-        queryset = self.filter_queryset(self.get_queryset())
-        count = queryset.count()
-        
-       
-        data = {
-            'count': count,
-            'results': UserSerializer(queryset, many=True).data
-        }
+        page = request.query_params.get('page')
+        paginator = Paginator(self.users, 10)
 
-        return JsonResponse(data)
+        try:
+            users = paginator.page(page)
+        except PageNotAnInteger:
+            users = paginator.page(1)
+        except EmptyPage:
+            users = paginator.page(paginator.num_pages)
+
+        if page == None:
+            page = 1
+
+        page = int(page)
+        
+        serializer = UserSerializer(users, many=True)
+        return JsonResponse({'users': serializer.data, 'page': page, 'pages': paginator.num_pages})
            

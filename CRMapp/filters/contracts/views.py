@@ -2,7 +2,7 @@
 from rest_framework import generics
 from CRMapp.models import *
 from CRMapp.contracts.serializers import *
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
@@ -10,7 +10,7 @@ from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp ]
-    queryset = Contract.objects.all()
+    contracts = Contract.objects.all()
     serializer_class = ContractSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -31,16 +31,23 @@ class ContractListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
-        queryset = self.filter_queryset(self.get_queryset())
-        count = queryset.count()
-        
-       
-        data = {
-            'count': count,
-            'results': ContractSerializer(queryset, many=True).data
-        }
+        page = request.query_params.get('page')
+        paginator = Paginator(self.contracts, 10)
 
-        return JsonResponse(data,safe=False)
+        try:
+            contracts = paginator.page(page)
+        except PageNotAnInteger:
+            contracts = paginator.page(1)
+        except EmptyPage:
+            contracts = paginator.page(paginator.num_pages)
+
+        if page == None:
+            page = 1
+
+        page = int(page)
+        
+        serializer = ContractSerializer(contracts, many=True)
+        return JsonResponse({'contracts': serializer.data, 'page': page, 'pages': paginator.num_pages})
            
 
 
@@ -88,7 +95,7 @@ class ContractMaintenanceListView(generics.ListAPIView):
 
 class ContractPhaseListView(generics.ListAPIView):    
     permission_classes = [IsManager | IsManagerMaint | IsEmp ]
-    queryset = Phase.objects.all()
+    phases = Phase.objects.all()
     serializer_class = PhaseSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -111,14 +118,21 @@ class ContractPhaseListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
-        queryset = self.filter_queryset(self.get_queryset())
-        count = queryset.count()
-        
-       
-        data = {
-            'count': count,
-            'results': PhaseSerializer(queryset, many=True).data
-        }
+        page = request.query_params.get('page')
+        paginator = Paginator(self.phases, 10)
 
-        return JsonResponse(data)
+        try:
+            phases = paginator.page(page)
+        except PageNotAnInteger:
+            phases = paginator.page(1)
+        except EmptyPage:
+            phases = paginator.page(paginator.num_pages)
+
+        if page == None:
+            page = 1
+
+        page = int(page)
+        
+        serializer = PhaseSerializer(phases, many=True)
+        return JsonResponse({'phases': serializer.data, 'page': page, 'pages': paginator.num_pages})
            

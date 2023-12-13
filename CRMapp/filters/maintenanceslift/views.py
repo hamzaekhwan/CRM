@@ -6,11 +6,11 @@ from CRMapp.authentications.permissions import *
 from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
-
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MaintenanceLiftListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint ]
-    queryset = MaintenanceLift.objects.all()
+    maintenancelifts = MaintenanceLift.objects.all()
     serializer_class = MaintenanceLiftSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -31,16 +31,23 @@ class MaintenanceLiftListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
-        queryset = self.filter_queryset(self.get_queryset())
-        count = queryset.count()
-        
-       
-        data = {
-            'count': count,
-            'results': Contract(queryset, many=True).data
-        }
+        page = request.query_params.get('page')
+        paginator = Paginator(self.maintenancelifts, 10)
 
-        return JsonResponse(data)
+        try:
+            maintenancelifts = paginator.page(page)
+        except PageNotAnInteger:
+            maintenancelifts = paginator.page(1)
+        except EmptyPage:
+            maintenancelifts = paginator.page(paginator.num_pages)
+
+        if page == None:
+            page = 1
+
+        page = int(page)
+        
+        serializer = MaintenanceLiftSerializer(maintenancelifts, many=True)
+        return JsonResponse({'MaintenanceLifts': serializer.data, 'page': page, 'pages': paginator.num_pages})
            
 
     

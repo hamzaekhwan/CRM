@@ -130,67 +130,67 @@ def maintenance_mobile(request, pk=None):
 @permission_classes([IsManager | IsManagerMaint])
 def maintenance_website(request,pk=None):
  
-    if request.method == 'POST' :
-        contract = get_object_or_404(Contract, id=pk)
-        client_name = contract.interest.client.name    
-        client_mobile_phone = contract.interest.client.mobile_phone 
-        client_city = contract.interest.client.city 
-        ats = contract.ats
+    # if request.method == 'POST' :
+    #     contract = get_object_or_404(Contract, id=pk)
+    #     client_name = contract.interest.client.name    
+    #     client_mobile_phone = contract.interest.client.mobile_phone 
+    #     client_city = contract.interest.client.city 
+    #     ats = contract.ats
 
-        maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
-        data=request.data
+    #     maintenance_lift=get_object_or_404(MaintenanceLift,contract=contract)
+    #     data=request.data
        
-        type_name=data['type_name']
-        remarks=data['remarks']
-        date=data['date']
-        technician=data['technician']
-        helper1=data['helper1']
-        helper2=data['helper2']
-        check_images=request.FILES.getlist('check_images')
+    #     type_name=data['type_name']
+    #     remarks=data['remarks']
+    #     date=data['date']
+    #     technician=data['technician']
+    #     helper1=data['helper1']
+    #     helper2=data['helper2']
+    #     check_images=request.FILES.getlist('check_images')
 
-        signatures=request.FILES.getlist('signatures') ## 0-TECHNICIAN Signature 1-CLIENT Signature  2-SUPERVISOR Signature
+    #     signatures=request.FILES.getlist('signatures') ## 0-TECHNICIAN Signature 1-CLIENT Signature  2-SUPERVISOR Signature
        
-        maintenance=Maintenance.objects.create(contract=contract,
-                                    maintenance_lift=maintenance_lift,
-                                    type_name=type_name,
-                                    remarks=remarks,
-                                    date=date,
-                                    technician=technician,
-                                    helper1=helper1,
-                                    helper2=helper2
-                                    )
+    #     maintenance=Maintenance.objects.create(contract=contract,
+    #                                 maintenance_lift=maintenance_lift,
+    #                                 type_name=type_name,
+    #                                 remarks=remarks,
+    #                                 date=date,
+    #                                 technician=technician,
+    #                                 helper1=helper1,
+    #                                 helper2=helper2
+    #                                 )
         
-        for image in check_images:
+    #     for image in check_images:
        
-            CheckImage.objects.create(maintenance=maintenance, image=image)
+    #         CheckImage.objects.create(maintenance=maintenance, image=image)
 
-        pdf_maintenance_contract = PdfMaintenanceContract.objects.create(maintenance=maintenance)
-        report_number = pdf_maintenance_contract.id
+    #     pdf_maintenance_contract = PdfMaintenanceContract.objects.create(maintenance=maintenance)
+    #     report_number = pdf_maintenance_contract.id
         
-        s = shortuuid.ShortUUID(alphabet="0123456789abcde")
-        otp = s.random(length=12)
+    #     s = shortuuid.ShortUUID(alphabet="0123456789abcde")
+    #     otp = s.random(length=12)
         
-        sections_data=data['sections_data']
-        pdf_file = create_report(
-            sections_data,
-            date,
-            report_number,
-            client_city,
-            ats,
-            client_name,
-            client_mobile_phone,
-            remarks,
-            signatures,
-            output_file="{}_{}maintenance_report.pdf".format(client_name, otp)
-        )
+    #     sections_data=data['sections_data']
+    #     pdf_file = create_report(
+    #         sections_data,
+    #         date,
+    #         report_number,
+    #         client_city,
+    #         ats,
+    #         client_name,
+    #         client_mobile_phone,
+    #         remarks,
+    #         signatures,
+    #         output_file="{}_{}maintenance_report.pdf".format(client_name, otp)
+    #     )
         
-        pdf_maintenance_contract.file = pdf_file
-        pdf_maintenance_contract.save()
+    #     pdf_maintenance_contract.file = pdf_file
+    #     pdf_maintenance_contract.save()
 
  
     
-        message = {'detail': 'maint added successfully'}
-        return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
+    #     message = {'detail': 'maint added successfully'}
+    #     return JsonResponse(message,safe=False, status=status.HTTP_200_OK)
     
     if request.method == 'GET' :  
         if pk is not None:
@@ -243,7 +243,7 @@ def getmaintenances(request):
         query = ''
 
     maintenances = Maintenance.objects.filter(
-        ats__icontains=query)
+        contract__ats__icontains=query)
 
     page = request.query_params.get('page')
     paginator = Paginator(maintenances, 10)

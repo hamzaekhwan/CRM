@@ -234,7 +234,7 @@ def getnotes(request):
         query = ''
 
     notes = Note.objects.filter(
-        ats__icontains=query)
+        contract__ats__icontains=query)
 
     page = request.query_params.get('page')
     paginator = Paginator(notes, 10)
@@ -324,7 +324,7 @@ def getphases(request):
         query = ''
 
     phases = Phase.objects.filter(
-        ats__icontains=query)
+        contract__ats__icontains=query)
 
     page = request.query_params.get('page')
     paginator = Paginator(phases, 10)

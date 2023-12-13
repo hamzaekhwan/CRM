@@ -211,6 +211,7 @@ def reminder(request, pk=None):
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def getclients(request):
+    
     query = request.query_params.get('keyword')
     
     if query == None:
@@ -220,7 +221,7 @@ def getclients(request):
         name__icontains=query).order_by('-date')
 
     page = request.query_params.get('page')
-    paginator = Paginator(clients, 10)
+    paginator = Paginator(clients, 1)
 
     try:
         clients = paginator.page(page)
@@ -233,10 +234,39 @@ def getclients(request):
         page = 1
 
     page = int(page)
-    print('Page:', page)
+    
     serializer = ClientSerializer(clients, many=True)
     return Response({'clients': serializer.data, 'page': page, 'pages': paginator.num_pages})
-            
+
+@api_view(['GET'])
+@permission_classes([IsManager | IsManagerMaint | IsEmp])
+def getinterests(request):
+    query = request.query_params.get('keyword')
+    
+    if query == None:
+        query = ''
+
+    interests = Interest.objects.filter(
+        client__name__icontains=query)
+
+    page = request.query_params.get('page')
+    paginator = Paginator(interests, 10)
+
+    try:
+        interests = paginator.page(page)
+    except PageNotAnInteger:
+        interests = paginator.page(1)
+    except EmptyPage:
+        interests = paginator.page(paginator.num_pages)
+
+    if page == None:
+        page = 1
+
+    page = int(page)
+    
+    serializer = InterestSerializer(interests, many=True)
+    return JsonResponse({'interests': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
 # @api_view(['POST'])
 # def export_file(request, file_type):
 #     data=request.data

@@ -101,8 +101,8 @@ def getmaintenancelifts(request):
     if query == None:
         query = ''
 
-    maintenancelifts = Maintenance.objects.filter(
-        ats__icontains=query)
+    maintenancelifts = MaintenanceLift.objects.filter(
+        contract__ats__icontains=query)
 
     page = request.query_params.get('page')
     paginator = Paginator(maintenancelifts, 10)

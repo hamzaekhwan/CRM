@@ -11,7 +11,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class ClientListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp]
-    clients = Client.objects.all()
+    queryset = Client.objects.all()
     serializer_class = ClientSerializer
     
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -23,11 +23,14 @@ class ClientListView(generics.ListAPIView):
                      'city',
                      'mobile_phone',
                      ]
-
+    
     def get(self, request, *args, **kwargs):
 
+        queryset = self.filter_queryset(self.get_queryset())
+       
+
         page = request.query_params.get('page')
-        paginator = Paginator(self.clients, 10)
+        paginator = Paginator(queryset, 10)
 
         try:
             clients = paginator.page(page)
@@ -43,11 +46,13 @@ class ClientListView(generics.ListAPIView):
         
         serializer = ClientSerializer(clients, many=True)
         return JsonResponse({'clients': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    
            
 
 class InterestListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp]
-    interests = Interest.objects.all()
+    queryset = Interest.objects.all()
     serializer_class = InterestSerializer
     
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -62,9 +67,10 @@ class InterestListView(generics.ListAPIView):
                      ]
     
     def get(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
 
         page = request.query_params.get('page')
-        paginator = Paginator(self.interests, 10)
+        paginator = Paginator(queryset, 10)
 
         try:
             interests = paginator.page(page)

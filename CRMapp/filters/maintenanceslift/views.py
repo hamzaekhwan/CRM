@@ -10,7 +10,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MaintenanceLiftListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint ]
-    maintenancelifts = MaintenanceLift.objects.all()
+    queryset = MaintenanceLift.objects.all()
     serializer_class = MaintenanceLiftSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -31,8 +31,10 @@ class MaintenanceLiftListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
+        queryset = self.filter_queryset(self.get_queryset())
+
         page = request.query_params.get('page')
-        paginator = Paginator(self.maintenancelifts, 10)
+        paginator = Paginator(queryset, 10)
 
         try:
             maintenancelifts = paginator.page(page)

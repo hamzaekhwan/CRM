@@ -10,7 +10,7 @@ from CRMapp.models import *
 from django.shortcuts import get_object_or_404
 from CRMapp.functions import export_to_csv , export_to_excel ,export_to_pdf
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from CRMapp.validators import phone_regex
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def client(request,pk=None):
@@ -19,6 +19,11 @@ def client(request,pk=None):
 
         name=data['name']
         mobile_phone=data['mobile_phone']
+        try:
+                phone_regex(mobile_phone)
+        except:
+                message = {'detail': "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."}
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
         client_exists = Client.objects.filter(name__icontains=name).exists() or Client.objects.filter(mobile_phone=mobile_phone).exists()
         if not client_exists:
             
@@ -69,6 +74,11 @@ def client(request,pk=None):
         name = data.get('name', client.name)
       
         mobile_phone = data.get('mobile_phone', client.mobile_phone)
+        
+        if not phone_regex(mobile_phone):
+            message = {'detail': "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
         arabic_name = data.get('arabic_name', client.arabic_name)
         city = data.get('city', client.city)
 

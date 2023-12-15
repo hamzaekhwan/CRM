@@ -109,7 +109,7 @@ class Maintenance(models.Model):
     remarks = models.TextField()
     technician = models.CharField("Name Of technician", max_length=255)
     helper1 = models.CharField("Name Of helper1", max_length=255,blank=True)
-    helper2 = models.CharField("Name Of helper1", max_length=255,blank=True)
+    helper2 = models.CharField("Name Of helper2", max_length=255,blank=True)
     date = models.DateField("Date of remark")
 
     def __str__(self):

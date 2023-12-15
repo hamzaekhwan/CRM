@@ -11,7 +11,7 @@ from django.utils import timezone
 from CRMapp.authentications.permissions import *
 from CRMapp.maintenances.serializers import MaintenanceSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
+from CRMapp.validators import url_validator
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def contract(request,pk=None):
@@ -36,7 +36,11 @@ def contract(request,pk=None):
 
             location=data['location']
 
-
+            try:
+                    url_validator(location)
+            except:
+                    message = {'detail': 'Invalid URL format for location'}
+                    return Response(message, status=status.HTTP_400_BAD_REQUEST)
             new_conrtract=Contract.objects.create(
                                         ats=ats,
                                         interest=interest,
@@ -84,7 +88,14 @@ def contract(request,pk=None):
         contract.lift_type=data.get('lift_type', contract.lift_type)
         contract.size = data.get('size', contract.size)
         contract.floors = data.get('floors', contract.floors)
-        contract.location = data.get('location', contract.location)
+        location = data.get('location', contract.location)
+        if not url_validator(location):
+            message = {'detail': 'Invalid URL format for location'}
+            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+
+        contract.location = location
+
+        
 
         contract.save()
 

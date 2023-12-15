@@ -11,7 +11,7 @@ from CRMapp.authentications.permissions import *
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 class UserListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint ]
-    users = User.objects.all()
+    queryset = User.objects.all()
     serializer_class = UserSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -27,8 +27,10 @@ class UserListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
+        queryset = self.filter_queryset(self.get_queryset())
+
         page = request.query_params.get('page')
-        paginator = Paginator(self.users, 10)
+        paginator = Paginator(queryset, 10)
 
         try:
             users = paginator.page(page)

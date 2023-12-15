@@ -10,7 +10,7 @@ from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp ]
-    contracts = Contract.objects.all()
+    queryset = Contract.objects.all()
     serializer_class = ContractSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -30,9 +30,10 @@ class ContractListView(generics.ListAPIView):
                      'location',]
     
     def get(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
 
         page = request.query_params.get('page')
-        paginator = Paginator(self.contracts, 10)
+        paginator = Paginator(queryset, 10)
 
         try:
             contracts = paginator.page(page)
@@ -95,7 +96,7 @@ class ContractMaintenanceListView(generics.ListAPIView):
 
 class ContractPhaseListView(generics.ListAPIView):    
     permission_classes = [IsManager | IsManagerMaint | IsEmp ]
-    phases = Phase.objects.all()
+    queryset = Phase.objects.all()
     serializer_class = PhaseSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -118,8 +119,10 @@ class ContractPhaseListView(generics.ListAPIView):
     
     def get(self, request, *args, **kwargs):
 
+        queryset = self.filter_queryset(self.get_queryset())
+
         page = request.query_params.get('page')
-        paginator = Paginator(self.phases, 10)
+        paginator = Paginator(queryset, 10)
 
         try:
             phases = paginator.page(page)

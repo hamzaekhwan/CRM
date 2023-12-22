@@ -9,6 +9,7 @@ from rest_framework.response import *
 from rest_framework.permissions import *
 from django.shortcuts import get_object_or_404
 from .permissions import * 
+from django.contrib.auth.hashers import make_password
 # Create your views here.
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     
@@ -83,7 +84,7 @@ def admin(request,pk=None):
 
         user_exists = User.objects.filter(username=username).exists() or User.objects.filter(email=email).exists()
         if not user_exists:
-            user = User.objects.create_user(username=username, email=email, password=password)
+            user = User.objects.create_user(username=username, email=email, password=make_password(password))
             user.save()
 
             profile = UserProfile.objects.create(

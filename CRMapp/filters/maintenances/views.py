@@ -10,7 +10,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MaintenanceListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint ]
-    queryset = Maintenance.objects.all()
+    queryset = Maintenance.objects.all().order_by('-id')
     serializer_class = MaintenanceSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -20,6 +20,8 @@ class MaintenanceListView(generics.ListAPIView):
     search_fields = ['contract__interest__client__name',
                      'contract__interest__client__arabic_name',
                      'contract__interest__client__city',
+                     'contract__interest__client__mobile_phone',
+                     'contract__ats'
                      'date']
  
     

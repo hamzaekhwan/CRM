@@ -12,6 +12,8 @@ from CRMapp.authentications.permissions import *
 from CRMapp.maintenances.serializers import MaintenanceSerializer
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from CRMapp.validators import url_validator
+from datetime import datetime
+from CRMapp.clients.serializers import ClientSerializer
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def contract(request,pk=None):
@@ -36,6 +38,8 @@ def contract(request,pk=None):
 
             location=data['location']
 
+            signed=data['signed']
+
             try:
                     url_validator(location)
             except:
@@ -47,7 +51,8 @@ def contract(request,pk=None):
                                         lift_type=lift_type,
                                         size=size,
                                         floors=floors,
-                                        location=location )
+                                        location=location,
+                                        signed=signed )
             
            
             
@@ -67,7 +72,7 @@ def contract(request,pk=None):
             serializer = ContractSerializer(user)
             return Response(serializer.data)
         else:
-            query=Contract.objects.all()
+            query=Contract.objects.all().order_by('-id')
 
             serializer=ContractSerializer(query,many=True)
             return Response(serializer.data)
@@ -89,6 +94,7 @@ def contract(request,pk=None):
         contract.size = data.get('size', contract.size)
         contract.floors = data.get('floors', contract.floors)
         location = data.get('location', contract.location)
+        contract.signed = data.get('signed', contract.signed)
         if not url_validator(location):
             message = {'detail': 'Invalid URL format for location'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
@@ -111,7 +117,7 @@ def getcontracts(request):
         query = ''
 
     contracts = Contract.objects.filter(
-        ats__icontains=query)
+        ats__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(contracts, 10)
@@ -137,7 +143,7 @@ def contract_phases_by_id(request,pk):
 
     contract = get_object_or_404(Contract, id=pk)
 
-    query=Phase.objects.filter(contract=contract)
+    query=Phase.objects.filter(contract=contract).order_by('-id')
     serializer=PhaseSerializer(query,many=True)
     return JsonResponse(serializer.data,safe=False)
 
@@ -147,7 +153,7 @@ def maintenancelift_contract_by_id(request,pk):
 
     contract = get_object_or_404(Contract, id=pk)
 
-    query=MaintenanceLift.objects.filter(contract=contract)
+    query=MaintenanceLift.objects.filter(contract=contract).order_by('-id')
     serializer=ContractMaintenanceSerializer(query,many=True)
     return JsonResponse(serializer.data,safe=False)
 
@@ -157,8 +163,31 @@ def maintenance_contract_by_id(request,pk):
 
     contract = get_object_or_404(Contract, id=pk)
 
-    query=Maintenance.objects.filter(contract=contract)
+    query=Maintenance.objects.filter(contract=contract).order_by('-id')
     serializer=MaintenanceSerializer(query,many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@permission_classes([IsManager | IsManagerMaint])
+def note_contract_by_id(request,pk):
+
+    contract = get_object_or_404(Contract, id=pk)
+
+    query=Note.objects.filter(contract=contract).order_by('-id')
+    serializer=NoteSerializer(query,many=True)
+    return JsonResponse(serializer.data,safe=False)
+
+@api_view(['GET'])
+@permission_classes([IsManager | IsManagerMaint])
+def client_info_by_contract_by_id(request,pk):
+
+    contract = get_object_or_404(Contract, id=pk)
+    interest=Interest.objects.get(id=contract.interest.id)
+    client=interest.client 
+
+
+    query=Client.objects.get(id=client.id)
+    serializer=ClientSerializer(query,many=False)
     return JsonResponse(serializer.data,safe=False)
 
 #api to get contracts by client id
@@ -171,7 +200,7 @@ def client(request,pk=None):
     interests=Interest.objects.filter(client=client)
 
     
-    contract=Contract.objects.filter(interest__in=interests)
+    contract=Contract.objects.filter(interest__in=interests).order_by('-id')
        
         
 
@@ -232,7 +261,7 @@ def note(request,pk=None):
             serializer = NoteSerializer(note)
             return Response(serializer.data)
         else:
-            notes = Note.objects.all()
+            notes = Note.objects.all().order_by('-id')
             serializer = NoteSerializer(notes, many=True)
             return Response(serializer.data)
 
@@ -245,7 +274,7 @@ def getnotes(request):
         query = ''
 
     notes = Note.objects.filter(
-        contract__ats__icontains=query)
+        contract__ats__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(notes, 10)
@@ -305,6 +334,14 @@ def phase(request,pk=None):
         phase_obj.start_date = data.get('start_date', phase_obj.start_date)
         phase_obj.end_date = data.get('end_date', phase_obj.end_date)
 
+        today = timezone.now().date()
+        if phase_obj.end_date:
+            end_date = datetime.strptime(phase_obj.end_date, "%Y-%m-%d").date()
+            if end_date <= today:
+                phase_obj.isActive = False
+            else:
+                phase_obj.isActive = True
+
         phase_obj.save()
 
         message = {'detail': 'Phase updated successfully'}
@@ -322,7 +359,7 @@ def phase(request,pk=None):
             serializer = PhaseSerializer(phase)
             return Response(serializer.data)
         else:
-            phases = Phase.objects.all()
+            phases = Phase.objects.all().order_by('-id')
             serializer = PhaseSerializer(phases, many=True)
             return Response(serializer.data)
 
@@ -335,7 +372,7 @@ def getphases(request):
         query = ''
 
     phases = Phase.objects.filter(
-        contract__ats__icontains=query)
+        contract__ats__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(phases, 10)
@@ -363,25 +400,6 @@ def end_phase(request,pk):
     message = {'detail': 'phase ended successfully'}
     return Response(message)
 
-
-
-# @api_view(['POST'])
-# @permission_classes([IsAdminUser])
-# def auto_change_phase(request):
-#     data=request.data
-    
-#     contract_id=data['contract_id']
-#     contract_obj=ElevatorContract.objects.get(id=contract_id)
-
-#     start_date_new_phase=data['start_date']
-    
-#     new_phase = move_to_next_phase(contract_obj,start_date_new_phase)
-#     if new_phase:
-#         message = {'detail': 'move done successfully'}
-#         return Response(message)
-#     else:
-#         message = {'detail': 'there is no more phases'}
-#         return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
 
 

@@ -52,6 +52,7 @@ class Contract(models.Model):
     lift_type=models.CharField("Type", max_length=64,blank=True)
     location=models.URLField('Location',blank=True)
     size=models.IntegerField("Size",blank=True)
+    signed=models.BooleanField("Signed",default=False)
 
     def __str__(self):
         return str(self.ats ) 

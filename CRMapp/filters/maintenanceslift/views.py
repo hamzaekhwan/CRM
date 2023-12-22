@@ -10,7 +10,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MaintenanceLiftListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint ]
-    queryset = MaintenanceLift.objects.all()
+    queryset = MaintenanceLift.objects.all().order_by('-id')
     serializer_class = MaintenanceLiftSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]

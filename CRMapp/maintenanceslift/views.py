@@ -89,7 +89,7 @@ def maintenancelift(request,pk=None):
             serializer = MaintenanceLiftSerializer(query)
             return Response(serializer.data)
         else:
-            query = MaintenanceLift.objects.all()
+            query = MaintenanceLift.objects.all().order_by('-id')
             serializer = MaintenanceLiftSerializer(query, many=True)
             return Response(serializer.data)
 
@@ -102,7 +102,7 @@ def getmaintenancelifts(request):
         query = ''
 
     maintenancelifts = MaintenanceLift.objects.filter(
-        contract__ats__icontains=query)
+        contract__ats__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(maintenancelifts, 10)

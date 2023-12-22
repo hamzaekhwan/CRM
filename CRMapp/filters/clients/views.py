@@ -11,7 +11,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class ClientListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp]
-    queryset = Client.objects.all()
+    queryset = Client.objects.all().order_by('-id')
     serializer_class = ClientSerializer
     
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -52,7 +52,7 @@ class ClientListView(generics.ListAPIView):
 
 class InterestListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp]
-    queryset = Interest.objects.all()
+    queryset = Interest.objects.all().order_by('-id')
     serializer_class = InterestSerializer
     
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]

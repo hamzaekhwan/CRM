@@ -38,6 +38,7 @@ class ContractSerializer(serializers.ModelSerializer):
                 'size',
                 'floors',
                 'location',
+                'signed',
                 'notes',
                 'current_phase',
                 'villa_no',

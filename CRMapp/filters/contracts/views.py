@@ -10,7 +10,7 @@ from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp ]
-    queryset = Contract.objects.all()
+    queryset = Contract.objects.all().order_by('-id')
     serializer_class = ContractSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
@@ -96,7 +96,7 @@ class ContractMaintenanceListView(generics.ListAPIView):
 
 class ContractPhaseListView(generics.ListAPIView):    
     permission_classes = [IsManager | IsManagerMaint | IsEmp ]
-    queryset = Phase.objects.all()
+    queryset = Phase.objects.all().order_by('-id')
     serializer_class = PhaseSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]

@@ -199,7 +199,7 @@ def maintenance_website(request,pk=None):
             serializer = MaintenanceSerializer(maintenance)
             return JsonResponse(serializer.data,safe=False)
         else:
-            maintenances = Maintenance.objects.all()
+            maintenances = Maintenance.objects.all().order_by('-id')
             serializer = MaintenanceSerializer(maintenances, many=True)
             return JsonResponse(serializer.data,safe=False)                 
 
@@ -243,7 +243,7 @@ def getmaintenances(request):
         query = ''
 
     maintenances = Maintenance.objects.filter(
-        contract__ats__icontains=query)
+        contract__ats__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(maintenances, 10)

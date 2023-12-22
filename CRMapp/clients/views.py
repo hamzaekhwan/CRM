@@ -56,7 +56,7 @@ def client(request,pk=None):
             serializer = ClientSerializer(user)
             return Response(serializer.data)
         else:
-            query=Client.objects.all()
+            query=Client.objects.all().order_by('-id')
             serializer=ClientSerializer(query,many=True)
             return JsonResponse(serializer.data,safe=False)
     
@@ -126,7 +126,7 @@ def interest(request,pk=None):
             serializer = InterestSerializer(user)
             return Response(serializer.data)
         else:
-            query=Interest.objects.all()
+            query=Interest.objects.all().order_by('-id')
             serializer=InterestSerializer(query,many=True)
             return JsonResponse(serializer.data,safe=False)
         
@@ -138,8 +138,8 @@ def interest(request,pk=None):
 
         company_name = data.get('company_name', interest.company_name)
         inquiry = data.get('inquiry', interest.inquiry)
-        
-        interest_exist=Interest.objects.filter(client=client,company_name=company_name)
+
+        interest_exist=Interest.objects.filter(client=client,company_name=company_name).exclude(id=pk)
         if not interest_exist :
             interest.company_name=company_name
             interest.inquiry=inquiry
@@ -173,7 +173,7 @@ def reminder(request, pk=None):
             serializer = ReminderSerializer(reminder)
             return Response(serializer.data)
         else:
-            reminders = Reminder.objects.all()
+            reminders = Reminder.objects.all().order_by('-id')
             serializer = ReminderSerializer(reminders, many=True)
             return Response(serializer.data)
 
@@ -228,7 +228,7 @@ def getclients(request):
         query = ''
 
     clients = Client.objects.filter(
-        name__icontains=query).order_by('-date')
+        name__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(clients, 1)
@@ -257,7 +257,7 @@ def getinterests(request):
         query = ''
 
     interests = Interest.objects.filter(
-        client__name__icontains=query)
+        client__name__icontains=query).order_by('-id')
 
     page = request.query_params.get('page')
     paginator = Paginator(interests, 10)

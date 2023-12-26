@@ -14,8 +14,8 @@ def start():
         scheduler.add_job(
             send_reminder_notifications,
             trigger="cron",
-            hour=21,
-            minute=5,
+            hour=16,
+            minute=40,
             second=0,
             id="send_reminder_001",
             replace_existing=True,

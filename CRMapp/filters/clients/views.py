@@ -57,7 +57,7 @@ class InterestListView(generics.ListAPIView):
     
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
-    filterset_fields = ['client__city','inquiry','company_name']
+    filterset_fields = ['client__city','company_name']
     
     search_fields = ['client__name',
                      'client__arabic_name',

@@ -20,6 +20,7 @@ class MaintenanceLiftListView(generics.ListAPIView):
                         'maintenance_type',
                         'spare_parts',
                         'number_of_visits_per_year',
+                        'contract__signed',
 
         ]
     

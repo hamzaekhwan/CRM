@@ -19,7 +19,8 @@ class ContractListView(generics.ListAPIView):
                         'lift_type',
                         'floors',
                         'interest__company_name',
-                        'interest__client__city',]
+                        'interest__client__city',
+                        'signed',]
     
     search_fields = ['interest__client__name',
                      'interest__client__mobile_phone',
@@ -27,7 +28,8 @@ class ContractListView(generics.ListAPIView):
                      'interest__client__city',
                      'interest__company_name',
                      'ats',
-                     'location',]
+                     'location',
+                     ]
     
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -104,9 +106,10 @@ class ContractPhaseListView(generics.ListAPIView):
     filterset_fields = [
                         'contract__lift_type',
                         'contract__floors',
+                        'contract__signed',
                         'contract__interest__company_name',
                         'contract__interest__client__city',
-                        'Name']
+                        'Name',]
     
     search_fields = ['contract__interest__client__name',
                      'contract__interest__client__mobile_phone',

@@ -22,7 +22,7 @@ def client(request,pk=None):
         try:
                 phone_regex(mobile_phone)
         except:
-                message = {'detail': "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."}
+                message = {'detail': "Phone number must be entered in the format: '+9715Xxxxxxxx'"}
                 return Response(message, status=status.HTTP_400_BAD_REQUEST)
         client_exists = Client.objects.filter(name__icontains=name).exists() or Client.objects.filter(mobile_phone=mobile_phone).exists()
         if not client_exists:
@@ -30,7 +30,7 @@ def client(request,pk=None):
             
             arabic_name=data['arabic_name']
             city=data['city']
-            inquiry=data['inquiry']
+            # inquiry=data['inquiry']
             date=data['date']
             company_name=data['company_name']
             client=Client.objects.create(name=name,
@@ -41,7 +41,7 @@ def client(request,pk=None):
                                 date=date )
             
             
-            Interest.objects.create(client=client,company_name=company_name,inquiry=inquiry)
+            Interest.objects.create(client=client,company_name=company_name)
 
             message = {'detail': 'Client added successfully'}
             return Response(message) 
@@ -75,9 +75,11 @@ def client(request,pk=None):
       
         mobile_phone = data.get('mobile_phone', client.mobile_phone)
         
-        if not phone_regex(mobile_phone):
-            message = {'detail': "Phone number must be entered in the format: '+999999999'. Up to 15 digits allowed."}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        try:
+                phone_regex(mobile_phone)
+        except:
+                message = {'detail': "Phone number must be entered in the format: '+9715Xxxxxxxx'"}
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
         arabic_name = data.get('arabic_name', client.arabic_name)
         city = data.get('city', client.city)
@@ -105,13 +107,13 @@ def interest(request,pk=None):
         data = request.data
 
         company_name = data['company_name']
-        inquiry=data['inquiry']
+        # inquiry=data['inquiry']
         interest_exist=Interest.objects.filter(client=client,company_name=company_name)
         if not interest_exist:
             Interest.objects.create(
                 client=client,
                 company_name=company_name,
-                inquiry=inquiry
+              
             )
 
             message = {'detail': 'interest added successfully'}
@@ -137,12 +139,12 @@ def interest(request,pk=None):
 
 
         company_name = data.get('company_name', interest.company_name)
-        inquiry = data.get('inquiry', interest.inquiry)
+        # inquiry = data.get('inquiry', interest.inquiry)
 
         interest_exist=Interest.objects.filter(client=client,company_name=company_name).exclude(id=pk)
         if not interest_exist :
             interest.company_name=company_name
-            interest.inquiry=inquiry
+           
             interest.save()
             message = {'detail': 'interest updated successfully'}
             return Response(message) 
@@ -202,13 +204,15 @@ def reminder(request, pk=None):
             message = {'detail': 'client with this reminder already exists'}
             return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
-    # elif request.method == 'PUT':
-    #     reminder = get_object_or_404(Reminder, id=pk)
-    #     serializer = ReminderSerializer(reminder, data=request.data)
-    #     if serializer.is_valid():
-    #         serializer.save()
-    #         return Response(serializer.data)
-    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    elif request.method == 'PUT':
+        reminder = get_object_or_404(Reminder, id=pk)
+        data = request.data
+
+        reminder.message=data.get('message', reminder.message)
+        reminder.reminder_datetime=data.get('reminder_datetime', reminder.reminder_datetime)
+
+        message = {'detail': 'reminder updated successfully'}
+        return Response(message, status=status.HTTP_200_OK)
 
     elif request.method == 'DELETE':
         reminder = get_object_or_404(Reminder, id=pk)

@@ -15,7 +15,8 @@ class MaintenanceListView(generics.ListAPIView):
 
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
-    filterset_fields = ['type_name']
+    filterset_fields = ['type_name',
+                        'contract__signed',]
     
     search_fields = ['contract__interest__client__name',
                      'contract__interest__client__arabic_name',

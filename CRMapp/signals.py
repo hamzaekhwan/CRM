@@ -27,12 +27,12 @@ def check_interest_exists(sender, instance, **kwargs):
         raise Exception("Client with this interest already exists")
 
 
-@receiver(pre_save, sender=Contract)
-def end_inquiry_phase(sender, instance, **kwargs):
+# @receiver(pre_save, sender=Contract)
+# def end_inquiry_phase(sender, instance, **kwargs):
    
         
-    instance.interest.inquiry = False
-    instance.interest.save()
+#     instance.interest.inquiry = False
+#     instance.interest.save()
         
 
 

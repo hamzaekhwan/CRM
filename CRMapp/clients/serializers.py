@@ -14,7 +14,7 @@ class InterestSerializer(serializers.ModelSerializer):
         fields = [
                 'id',
                 'client',
-                'inquiry',
+                
                 'company_name']
         
     def get_client(self, obj):

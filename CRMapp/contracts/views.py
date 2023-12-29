@@ -136,7 +136,8 @@ def getcontracts(request):
     
     serializer = ContractSerializer(contracts, many=True)
     return Response({'contracts': serializer.data, 'page': page, 'pages': paginator.num_pages})
-               
+
+
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def contract_phases_by_id(request,pk):
@@ -190,6 +191,11 @@ def client_info_by_contract_by_id(request,pk):
     serializer=ClientSerializer(query,many=False)
     return JsonResponse(serializer.data,safe=False)
 
+class DistinctFloorAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        distinct_floors = Contract.objects.values('floors').distinct()
+        serializer = DistinctFloorSerializer(distinct_floors, many=True)
+        return Response(serializer.data)
 #api to get contracts by client id
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])

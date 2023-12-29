@@ -11,11 +11,30 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Note
         fields='__all__'
 
+class ContractForPhaseSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Contract
+        fields='__all__'
 
 class PhaseSerializer(serializers.ModelSerializer):
+    contract=serializers.SerializerMethodField()
     class Meta:
         model = Phase
-        fields='__all__'
+        fields = [
+                
+                'id',
+                'contract',
+                'Name',
+                'isActive',
+                'start_date',
+                'end_date',
+        ]
+
+    def get_contract(self, obj):
+        query=Contract.objects.get(id=obj.contract.id)
+        serializer=ContractForPhaseSerializer(query,many=False)
+        return serializer.data
+
 
 class ContractMaintenanceSerializer(serializers.ModelSerializer):
     class Meta:
@@ -82,4 +101,5 @@ class ContractSerializer(serializers.ModelSerializer):
 
 
 
-
+class DistinctFloorSerializer(serializers.Serializer):
+    floors = serializers.CharField()

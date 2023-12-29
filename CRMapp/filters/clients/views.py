@@ -24,11 +24,14 @@ class ClientListView(generics.ListAPIView):
                      'mobile_phone',
                      ]
     
+    ordering_fields = ['name', 'city','date']  # Add the fields you want to support sorting on
     def get(self, request, *args, **kwargs):
 
         queryset = self.filter_queryset(self.get_queryset())
        
-
+        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+        queryset = queryset.order_by(ordering)
+        
         page = request.query_params.get('page')
         paginator = Paginator(queryset, 10)
 

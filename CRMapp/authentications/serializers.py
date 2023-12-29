@@ -18,10 +18,10 @@ class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
    
     isAdmin = serializers.SerializerMethodField(read_only=True)
-    profile= serializers.SerializerMethodField(read_only=True)
+    
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'name', 'isAdmin','profile']
+        fields = ['id', 'username', 'email', 'name', 'isAdmin',]
 
     def get__id(self, obj):
         return obj.id
@@ -34,11 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         return name
     
-    def get_profile(self, obj):
-        user=obj.id
-        profile=UserProfile.objects.get(user=user)
-        serializer=UserProfileSerializer(profile,many=False)
-        return serializer.data
+    
     
  
 
@@ -46,15 +42,34 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserSerializerWithToken(UserSerializer):
     token = serializers.SerializerMethodField(read_only=True)
-    
+    company_name= serializers.SerializerMethodField(read_only=True)
+    role=serializers.SerializerMethodField(read_only=True)
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'name', 'isAdmin', 'token']
+        fields = ['id', 'username', 'email', 'name', 'isAdmin', 'token',"company_name","role"]
 
     def get_token(self, obj):
         token = RefreshToken.for_user(obj)
         return str(token.access_token)
+    def get_company_name(self, obj):
+        user=obj.id
+        profile=UserProfile.objects.get(user=user)
+        company_name=profile.company_name
+        return company_name
     
+    def get_role(self, obj):
+        user=obj.id
+        profile=UserProfile.objects.get(user=user)
+        if profile.isMaint:
+            return 'maintenance'
+        elif profile.isManager:
+            return 'manager'
+        elif profile.isMangerMaint:
+            return 'maintenance_Manager'
+        elif profile.isEmp:
+            return 'employee'
+        else:
+            return 'No Role Assigned'
 class ChangePasswordSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
     password2 = serializers.CharField(write_only=True, required=True)

@@ -16,19 +16,37 @@ class MaintenanceListView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
 
     filterset_fields = ['type_name',
+                        "contract__interest__client__city",
+                        "contract__interest__company_name",
+                        "contract__floors",
+                        "contract__lift_type",
                         'contract__signed',]
     
+
+
     search_fields = ['contract__interest__client__name',
                      'contract__interest__client__arabic_name',
                      'contract__interest__client__city',
                      'contract__interest__client__mobile_phone',
-                     'contract__ats'
+                     'contract__ats',
                      'date']
+    
+    ordering_fields = [
+        'type_name',
+        'contract__interest__client__city',
+        'contract__interest__company_name',
+        'contract__floors',
+        'contract__lift_type',
+        'date',  # Add the field for sorting
+    ]
  
     
     def get(self, request, *args, **kwargs):
 
         queryset = self.filter_queryset(self.get_queryset())
+
+        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+        queryset = queryset.order_by(ordering)
 
         page = request.query_params.get('page')
         paginator = Paginator(queryset, 10)

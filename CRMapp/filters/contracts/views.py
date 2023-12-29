@@ -30,9 +30,19 @@ class ContractListView(generics.ListAPIView):
                      'ats',
                      'location',
                      ]
-    
+    ordering_fields = [
+                    'ats',
+                    'floors',
+                    'interest__company_name',
+                    'interest__client__city',
+                    'size',
+        
+                    ] 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
+        
+        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+        queryset = queryset.order_by(ordering)
 
         page = request.query_params.get('page')
         paginator = Paginator(queryset, 10)

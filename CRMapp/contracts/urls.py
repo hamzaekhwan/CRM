@@ -14,7 +14,7 @@ urlpatterns = [
     path('maintenance_contract_by_id/<str:pk>/', views.maintenance_contract_by_id, name='maintenance_contract_by_id'), 
     path('note_contract_by_id/<str:pk>/', views.note_contract_by_id, name='note_contract_by_id'), 
     path('client_info_by_contract_by_id/<str:pk>/', views.client_info_by_contract_by_id, name='client_info_by_contract_by_id'), 
-
+    path('api/distinct-floors/', views.DistinctFloorAPIView.as_view(), name='distinct-floors'),
     path('client/<str:pk>/', views.client, name='contract by id client'),   
 
     path('note/', views.note, name='note'),    

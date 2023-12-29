@@ -13,6 +13,7 @@ urlpatterns = [
     path('interest/', views.interest, name='interest'),  
     path('interest/<str:pk>/', views.interest, name='create-interest'),
     path('getinterests/', views.getinterests, name='getinterests'),
+    path('distinct-cities/', views.DistinctCityAPIView.as_view(), name='distinct-cities'),
     
 
     path('reminder/', views.reminder, name='reminder'),  

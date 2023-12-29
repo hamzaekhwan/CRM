@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from CRMapp.models import *
-
+from CRMapp.authentications.serializers import UserSerializer
 
 class InterClientSerializer(serializers.ModelSerializer):
     class Meta:
@@ -22,11 +22,33 @@ class InterestSerializer(serializers.ModelSerializer):
         serializer=InterClientSerializer(query,many=False)
         return serializer.data
 
-class ReminderSerializer(serializers.ModelSerializer):    
+class ReminderSerializer(serializers.ModelSerializer):   
+    client=serializers.SerializerMethodField()
+    admin= serializers.SerializerMethodField()
     class Meta:
         model = Reminder
-        fields='__all__'
+        fields = [
+                
+                'id',
+                'client',
+                'admin',
+                'message',
+                'reminder_datetime',
+                'notification_sent',
+               
+               
+                  
+        ]
 
+    def get_client(self, obj):
+        query=Client.objects.get(id=obj.client.id)
+        serializer=InterClientSerializer(query,many=False)
+        return serializer.data    
+    
+    def get_admin(self, obj):
+        query=User.objects.get(id=obj.admin.id)
+        serializer=UserSerializer(query,many=False)
+        return serializer.data  
 class ClientSerializer(serializers.ModelSerializer):
     interest=serializers.SerializerMethodField()
     reminder=serializers.SerializerMethodField()
@@ -54,5 +76,6 @@ class ClientSerializer(serializers.ModelSerializer):
         serializer=ReminderSerializer(query,many=True)
         return serializer.data
 
-
+class DistinctCitySerializer(serializers.Serializer):
+    city = serializers.CharField()
 

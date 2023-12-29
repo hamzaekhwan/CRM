@@ -281,6 +281,12 @@ def getinterests(request):
     serializer = InterestSerializer(interests, many=True)
     return JsonResponse({'interests': serializer.data, 'page': page, 'pages': paginator.num_pages})
 
+class DistinctCityAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        distinct_cities = Client.objects.values('city').distinct()
+        serializer = DistinctCitySerializer(distinct_cities, many=True)
+        return Response(serializer.data)
+
 # @api_view(['POST'])
 # def export_file(request, file_type):
 #     data=request.data

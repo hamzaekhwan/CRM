@@ -25,10 +25,10 @@ class ContractInline(admin.TabularInline):
     list_filter = ('type_maintenance', 'spare_parts', 'type', 'brand')
     
 class ContractAdmin(admin.ModelAdmin):
-    list_display = ['ats',]
+    list_display = ['id',]
     list_filter= ['floors']
   
-    actions = [export_to_excel,export_to_pdf,export_to_csv] 
+    actions = [export_all_data_to_excel,export_to_excel,export_to_pdf,export_to_csv] 
     inlines = [ PhaseInline, NoteInline,MaintenanceLiftInline,MaintenanceInline]
 
 class PhaseAdmin(admin.ModelAdmin):

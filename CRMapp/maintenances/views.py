@@ -239,11 +239,13 @@ def maintenance_website(request,pk=None):
 def getmaintenances(request):
     query = request.query_params.get('keyword')
     
-    if query == None:
+    if query is None:
         query = ''
 
-    maintenances = Maintenance.objects.filter(
-        contract__ats__icontains=query).order_by('-id')
+    maintenances = Maintenance.objects.filter(contract__ats__icontains=query).order_by('-id')
+
+    # Get the total count before pagination
+    total_count = maintenances.count()
 
     page = request.query_params.get('page')
     paginator = Paginator(maintenances, 10)
@@ -255,13 +257,22 @@ def getmaintenances(request):
     except EmptyPage:
         maintenances = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
     
     serializer = MaintenanceSerializer(maintenances, many=True)
-    return Response({'maintenances': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    # Include the total count in the JSON response
+    response_data = {
+        'maintenances': serializer.data,
+        'count': total_count,
+        'page': page,
+        'pages': paginator.num_pages
+    }
+
+    return Response(response_data)
         
 @api_view(['POST','GET','DELETE'])
 @permission_classes([IsManager | IsManagerMaint])

@@ -9,29 +9,31 @@ from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MaintenanceLiftListView(generics.ListAPIView):
-    permission_classes = [IsManager | IsManagerMaint ]
+    permission_classes = [IsManager | IsManagerMaint]
     queryset = MaintenanceLift.objects.all().order_by('-id')
     serializer_class = MaintenanceLiftSerializer
 
-    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
     filterset_fields = [
-                        
-                        'maintenance_type',
-                        'spare_parts',
-                        'number_of_visits_per_year',
-                        "contract__interest__client__city",
-                        "contract__interest__company_name",
-                        "contract__floors",
-                        "contract__lift_type",
-                        'contract__signed',]
-    
-    search_fields = ['contract__ats',
-                     'contract__lift_type',
-                     'maintenance_contract_number',
-                     'brand',
-                     'villa_no']
-    
+        'maintenance_type',
+        'spare_parts',
+        'number_of_visits_per_year',
+        "contract__interest__client__city",
+        "contract__interest__company_name",
+        "contract__floors",
+        "contract__lift_type",
+        'contract__signed',
+    ]
+
+    search_fields = [
+        'contract__ats',
+        'contract__lift_type',
+        'maintenance_contract_number',
+        'brand',
+        'villa_no',
+    ]
+
     ordering_fields = [
         'maintenance_type',
         'maintenance_contract_number',
@@ -46,15 +48,17 @@ class MaintenanceLiftListView(generics.ListAPIView):
         'free_maintenance_expiry_date',
         'contract_value',
         'villa_no',
-        'maintenance_contract_start_date',  # Add the field for sorting
+        'maintenance_contract_start_date',
     ]
 
     def get(self, request, *args, **kwargs):
-
         queryset = self.filter_queryset(self.get_queryset())
 
-        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+        ordering = request.query_params.get('ordering', '-id')
         queryset = queryset.order_by(ordering)
+
+        # Get the total count before pagination
+        total_count = queryset.count()
 
         page = request.query_params.get('page')
         paginator = Paginator(queryset, 10)
@@ -66,13 +70,22 @@ class MaintenanceLiftListView(generics.ListAPIView):
         except EmptyPage:
             maintenancelifts = paginator.page(paginator.num_pages)
 
-        if page == None:
+        if page is None:
             page = 1
 
         page = int(page)
         
         serializer = MaintenanceLiftSerializer(maintenancelifts, many=True)
-        return JsonResponse({'MaintenanceLifts': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+        # Include the total count in the JSON response
+        response_data = {
+            'MaintenanceLifts': serializer.data,
+            'count': total_count,
+            'page': page,
+            'pages': paginator.num_pages
+        }
+
+        return JsonResponse(response_data)
            
 
     

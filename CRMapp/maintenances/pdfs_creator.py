@@ -21,7 +21,7 @@ LIGHT_TEXT_COLOR = "#999999"
 DARK_TEXT_COLOR = "#333333"
 PAGE_WIDTH, PAGE_HEIGHT = 800, 1200
 
-pdfmetrics.registerFont(TTFont('Arabic', 'CRM/static/tradbdo.ttf'))
+pdfmetrics.registerFont(TTFont('Arabic', 'CRMapp/static/tradbdo.ttf'))
 
 def initialize_pdf(buffer):
  

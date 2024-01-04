@@ -14,6 +14,12 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from CRMapp.validators import url_validator
 from datetime import datetime
 from CRMapp.clients.serializers import ClientSerializer
+
+from openpyxl import Workbook
+from django.http import HttpResponse
+from CRMapp.models import *
+from django.core.exceptions import ObjectDoesNotExist
+
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def contract(request,pk=None):
@@ -113,11 +119,13 @@ def contract(request,pk=None):
 def getcontracts(request):
     query = request.query_params.get('keyword')
     
-    if query == None:
+    if query is None:
         query = ''
 
-    contracts = Contract.objects.filter(
-        ats__icontains=query).order_by('-id')
+    contracts = Contract.objects.filter(ats__icontains=query).order_by('-id')
+
+    # Get the total count before pagination
+    total_count = contracts.count()
 
     page = request.query_params.get('page')
     paginator = Paginator(contracts, 10)
@@ -129,13 +137,22 @@ def getcontracts(request):
     except EmptyPage:
         contracts = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
     
     serializer = ContractSerializer(contracts, many=True)
-    return Response({'contracts': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    # Include the total count in the JSON response
+    response_data = {
+        'contracts': serializer.data,
+        'count': total_count,
+        'page': page,
+        'pages': paginator.num_pages
+    }
+
+    return Response(response_data)
 
 
 @api_view(['GET'])
@@ -193,9 +210,15 @@ def client_info_by_contract_by_id(request,pk):
 
 class DistinctFloorAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        distinct_floors = Contract.objects.values('floors').distinct()
-        serializer = DistinctFloorSerializer(distinct_floors, many=True)
-        return Response(serializer.data)
+        distinct_floors = Contract.objects.values_list('floors', flat=True).distinct()
+        floor_list = [int(floor) for floor in list(distinct_floors)]
+        return Response(floor_list)
+    
+class DistinctLiftTypeAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        distinct_lift_types = Contract.objects.values_list('lift_type', flat=True).distinct()
+        lift_type_list = list(distinct_lift_types)
+        return Response(lift_type_list)
 #api to get contracts by client id
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
@@ -276,11 +299,13 @@ def note(request,pk=None):
 def getnotes(request):  
     query = request.query_params.get('keyword')
     
-    if query == None:
+    if query is None:
         query = ''
 
-    notes = Note.objects.filter(
-        contract__ats__icontains=query).order_by('-id')
+    notes = Note.objects.filter(contract__ats__icontains=query).order_by('-id')
+
+    # Get the total count before pagination
+    total_count = notes.count()
 
     page = request.query_params.get('page')
     paginator = Paginator(notes, 10)
@@ -292,13 +317,22 @@ def getnotes(request):
     except EmptyPage:
         notes = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
     
     serializer = NoteSerializer(notes, many=True)
-    return Response({'notes': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    # Include the total count in the JSON response
+    response_data = {
+        'notes': serializer.data,
+        'count': total_count,
+        'page': page,
+        'pages': paginator.num_pages
+    }
+
+    return Response(response_data)
 #################################################################################
 
 
@@ -371,14 +405,16 @@ def phase(request,pk=None):
 
 @api_view(['GET'])  ## pagination api 
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
-def getphases(request):  
+def getphases(request):
     query = request.query_params.get('keyword')
     
-    if query == None:
+    if query is None:
         query = ''
 
-    phases = Phase.objects.filter(
-        contract__ats__icontains=query).order_by('-id')
+    phases = Phase.objects.filter(contract__ats__icontains=query).order_by('-id')
+
+    # Get the total count before pagination
+    total_count = phases.count()
 
     page = request.query_params.get('page')
     paginator = Paginator(phases, 10)
@@ -390,13 +426,22 @@ def getphases(request):
     except EmptyPage:
         phases = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
     
     serializer = PhaseSerializer(phases, many=True)
-    return Response({'notes': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    # Include the total count in the JSON response
+    response_data = {
+        'phases': serializer.data,
+        'count': total_count,
+        'page': page,
+        'pages': paginator.num_pages
+    }
+
+    return Response(response_data)
 
 @api_view(['PUT'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
@@ -412,3 +457,101 @@ def end_phase(request,pk):
 
 
         
+@csrf_exempt  # Use this decorator to exempt CSRF protection for simplicity. Consider enabling CSRF in production.
+def export_data_to_excel(request):
+    if request.method == 'POST':
+        try:
+            # Assuming you send the contract IDs as a list in the request body
+            contract_ids = request.POST.getlist('contract_ids[]')
+
+            # Retrieve the contracts based on the provided IDs
+            queryset = Contract.objects.filter(id__in=contract_ids)
+
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="client_data.xlsx"'
+
+            workbook = Workbook()
+            worksheet = workbook.active
+
+            # Add column headers for Contract model
+            contract_fields = Contract._meta.fields
+            contract_headers = [field.verbose_name for field in contract_fields]
+            for col_num, header in enumerate(contract_headers, start=1):
+                worksheet.cell(row=1, column=col_num, value=header)
+
+            # Add column headers for Interest model
+            interest_fields = Interest._meta.fields
+            interest_headers = [field.verbose_name for field in interest_fields]
+            for col_num, header in enumerate(interest_headers, start=len(contract_headers) + 1):
+                worksheet.cell(row=1, column=col_num, value=header)
+
+            # Add column headers for Client model
+            client_fields = Client._meta.fields
+            client_headers = [field.verbose_name for field in client_fields]
+            for col_num, header in enumerate(client_headers, start=len(contract_headers) + len(interest_headers) + 1):
+                worksheet.cell(row=1, column=col_num, value=header)
+
+            # Add column headers for MaintenanceLift model
+            maintenance_lift_fields = MaintenanceLift._meta.fields
+            maintenance_lift_headers = [field.verbose_name for field in maintenance_lift_fields]
+            for col_num, header in enumerate(maintenance_lift_headers, start=len(contract_headers) + len(interest_headers) + len(client_headers) + 1):
+                worksheet.cell(row=1, column=col_num, value=header)
+
+            
+
+        
+
+            # Add column header for active phase name
+            worksheet.cell(row=1, column=len(contract_headers) + 1, value='Active Phase Name')
+
+            # Add data to the worksheet
+            for row, contract in enumerate(queryset, start=2):
+                # Contract data
+                for col_num, field in enumerate(contract_fields, start=1):
+                    field_name = field.name
+                    cell_value = str(getattr(contract, field_name))
+                    worksheet.cell(row=row, column=col_num, value=cell_value)
+
+                # Interest data
+                interest_data = contract.interest
+                for col_num, field in enumerate(interest_fields, start=len(contract_headers) + 1):
+                    field_name = field.name
+                    cell_value = str(getattr(interest_data, field_name))
+                    worksheet.cell(row=row, column=col_num, value=cell_value)
+
+                # Client data
+                client_data = interest_data.client
+                for col_num, field in enumerate(client_fields, start=len(contract_headers) + len(interest_headers) + 1):
+                    field_name = field.name
+                    cell_value = str(getattr(client_data, field_name))
+                    worksheet.cell(row=row, column=col_num, value=cell_value)
+
+                # MaintenanceLift data (if available)
+                try:
+                    maintenance_lift_data = contract.maintenancelift
+                    for col_num, field in enumerate(maintenance_lift_fields, start=len(contract_headers) + len(interest_headers) + len(client_headers) + 1):
+                        field_name = field.name
+                        cell_value = str(getattr(maintenance_lift_data, field_name))
+                        worksheet.cell(row=row, column=col_num, value=cell_value)
+                except ObjectDoesNotExist:
+                    # Handle the case where maintenancelift does not exist
+                    pass
+
+                # Get the active phase name for the contract
+                active_phase_name = Phase.objects.filter(contract=contract, isActive=True).values('Name').first()
+                if active_phase_name:
+                    active_phase_name = active_phase_name['Name']
+                else:
+                    active_phase_name = ''  # Set to empty string if no active phase
+
+                # Add the active phase name to the worksheet
+                active_phase_col = len(contract_headers) + 1
+                worksheet.cell(row=row, column=active_phase_col, value=active_phase_name)
+
+            workbook.save(response)
+            return response
+
+        except ObjectDoesNotExist:
+            return JsonResponse({'error': 'One or more contracts do not exist.'}, status=400)
+
+    return JsonResponse({'error': 'Invalid request method.'}, status=400)

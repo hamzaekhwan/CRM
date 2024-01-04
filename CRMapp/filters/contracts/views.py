@@ -9,40 +9,45 @@ from django.http import JsonResponse
 from CRMapp.authentications.permissions import *
 
 class ContractListView(generics.ListAPIView):
-    permission_classes = [IsManager | IsManagerMaint | IsEmp ]
+    permission_classes = [IsManager | IsManagerMaint | IsEmp]
     queryset = Contract.objects.all().order_by('-id')
     serializer_class = ContractSerializer
 
-    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
     filterset_fields = [
-                        'lift_type',
-                        'floors',
-                        'interest__company_name',
-                        'interest__client__city',
-                        'signed',]
-    
-    search_fields = ['interest__client__name',
-                     'interest__client__mobile_phone',
-                     'interest__client__arabic_name',
-                     'interest__client__city',
-                     'interest__company_name',
-                     'ats',
-                     'location',
-                     ]
+        'lift_type',
+        'floors',
+        'interest__company_name',
+        'interest__client__city',
+        'signed',
+    ]
+
+    search_fields = [
+        'interest__client__name',
+        'interest__client__mobile_phone',
+        'interest__client__arabic_name',
+        'interest__client__city',
+        'interest__company_name',
+        'ats',
+        'location',
+    ]
     ordering_fields = [
-                    'ats',
-                    'floors',
-                    'interest__company_name',
-                    'interest__client__city',
-                    'size',
-        
-                    ] 
+        'ats',
+        'floors',
+        'interest__company_name',
+        'interest__client__city',
+        'size',
+    ]
+
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        
-        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+
+        ordering = request.query_params.get('ordering', '-id')
         queryset = queryset.order_by(ordering)
+
+        # Get the total count before pagination
+        total_count = queryset.count()
 
         page = request.query_params.get('page')
         paginator = Paginator(queryset, 10)
@@ -54,20 +59,29 @@ class ContractListView(generics.ListAPIView):
         except EmptyPage:
             contracts = paginator.page(paginator.num_pages)
 
-        if page == None:
+        if page is None:
             page = 1
 
         page = int(page)
-        
+
         serializer = ContractSerializer(contracts, many=True)
-        return JsonResponse({'contracts': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+        # Include the total count in the JSON response
+        response_data = {
+            'contracts': serializer.data,
+            'count': total_count,
+            'page': page,
+            'pages': paginator.num_pages
+        }
+
+        return JsonResponse(response_data)
            
 
 
 ###for mobile search
 class ContractMaintenanceListView(generics.ListAPIView):
     permission_classes = [ApiKeyPermission]
-    serializer_class = ContractSerializer
+    serializer_class = ContractMobileSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
     search_fields = ['interest__client__name',
@@ -100,7 +114,7 @@ class ContractMaintenanceListView(generics.ListAPIView):
 
             data = {
                 'count': count,
-                'results': ContractSerializer(queryset, many=True).data
+                'results': ContractMobileSerializer(queryset, many=True).data
             }
 
         return JsonResponse(data, safe=False)
@@ -119,6 +133,7 @@ class ContractPhaseListView(generics.ListAPIView):
                         'contract__signed',
                         'contract__interest__company_name',
                         'contract__interest__client__city',
+                        'isActive',
                         'Name',]
     
     search_fields = ['contract__interest__client__name',
@@ -128,6 +143,15 @@ class ContractPhaseListView(generics.ListAPIView):
                      'contract__interest__company_name',
                      'contract__ats',
                      'contract__location',
+                     'Name']
+    
+    ordering_fields = ['contract__interest__client__name',
+                     'contract__interest__client__arabic_name',
+                     'contract__interest__client__city',
+                     'contract__interest__company_name',
+                     'contract__ats',
+                     'start_date',
+                     'end_date',
                      'Name']
     
     def get(self, request, *args, **kwargs):

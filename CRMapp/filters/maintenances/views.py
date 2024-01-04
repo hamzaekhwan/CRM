@@ -9,11 +9,11 @@ from CRMapp.authentications.permissions import *
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 class MaintenanceListView(generics.ListAPIView):
-    permission_classes = [IsManager | IsManagerMaint ]
+    permission_classes = [IsManager | IsManagerMaint]
     queryset = Maintenance.objects.all().order_by('-id')
     serializer_class = MaintenanceSerializer
 
-    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
     filterset_fields = ['type_name',
                         "contract__interest__client__city",
@@ -21,8 +21,6 @@ class MaintenanceListView(generics.ListAPIView):
                         "contract__floors",
                         "contract__lift_type",
                         'contract__signed',]
-    
-
 
     search_fields = ['contract__interest__client__name',
                      'contract__interest__client__arabic_name',
@@ -37,16 +35,17 @@ class MaintenanceListView(generics.ListAPIView):
         'contract__interest__company_name',
         'contract__floors',
         'contract__lift_type',
-        'date',  # Add the field for sorting
+        'date',
     ]
- 
-    
-    def get(self, request, *args, **kwargs):
 
+    def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
 
-        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+        ordering = request.query_params.get('ordering', '-id')
         queryset = queryset.order_by(ordering)
+
+        # Get the total count before pagination
+        total_count = queryset.count()
 
         page = request.query_params.get('page')
         paginator = Paginator(queryset, 10)
@@ -58,10 +57,19 @@ class MaintenanceListView(generics.ListAPIView):
         except EmptyPage:
             maintenances = paginator.page(paginator.num_pages)
 
-        if page == None:
+        if page is None:
             page = 1
 
         page = int(page)
         
         serializer = MaintenanceSerializer(maintenances, many=True)
-        return JsonResponse({'maintenances': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+        # Include the total count in the JSON response
+        response_data = {
+            'maintenances': serializer.data,
+            'count': total_count,
+            'page': page,
+            'pages': paginator.num_pages
+        }
+
+        return JsonResponse(response_data)

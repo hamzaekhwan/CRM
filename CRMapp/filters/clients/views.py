@@ -14,41 +14,49 @@ class ClientListView(generics.ListAPIView):
     queryset = Client.objects.all().order_by('-id')
     serializer_class = ClientSerializer
     
-    filter_backends = [DjangoFilterBackend, SearchFilter,OrderingFilter]
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
 
     filterset_fields = ['city']
  
-    search_fields = ['name',
-                     'arabic_name',
-                     'city',
-                     'mobile_phone',
-                     ]
+    search_fields = ['name', 'arabic_name', 'city', 'mobile_phone']
     
-    ordering_fields = ['name', 'city','date']  # Add the fields you want to support sorting on
-    def get(self, request, *args, **kwargs):
+    ordering_fields = ['name', 'city', 'date']
 
+    def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
        
-        ordering = request.query_params.get('ordering', '-id')  # Default to sorting by '-id' if no ordering is specified
+        ordering = request.query_params.get('ordering', '-id')
         queryset = queryset.order_by(ordering)
+
+        # Get the total count before pagination
+        total_count = queryset.count()
         
         page = request.query_params.get('page')
-        paginator = Paginator(queryset, 10)
+        paginator = Paginator(queryset, 1)
 
         try:
             clients = paginator.page(page)
         except PageNotAnInteger:
-            clients = paginator.page(1)
+            clients = paginator.page(10)
         except EmptyPage:
             clients = paginator.page(paginator.num_pages)
 
-        if page == None:
+        if page is None:
             page = 1
 
         page = int(page)
         
         serializer = ClientSerializer(clients, many=True)
-        return JsonResponse({'clients': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+        # Include the total count in the JSON response
+        response_data = {
+            'clients': serializer.data,
+            'count': total_count,
+            'page': page,
+            'pages': paginator.num_pages
+        }
+
+        return JsonResponse(response_data)
 
     
            

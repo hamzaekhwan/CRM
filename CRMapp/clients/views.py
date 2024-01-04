@@ -41,9 +41,9 @@ def client(request,pk=None):
                                 date=date )
             
             
-            Interest.objects.create(client=client,company_name=company_name)
+            interest=Interest.objects.create(client=client,company_name=company_name)
 
-            message = {'detail': 'Client added successfully'}
+            message = {"id" : interest.id ,'detail': 'Client added successfully'}
             return Response(message) 
         else:
             message = {'detail': 'client with this name already exists'}
@@ -228,14 +228,16 @@ def getclients(request):
     
     query = request.query_params.get('keyword')
     
-    if query == None:
+    if query is None:
         query = ''
 
-    clients = Client.objects.filter(
-        name__icontains=query).order_by('-id')
+    clients = Client.objects.filter(name__icontains=query).order_by('-id')
+
+    # Get the total count before pagination
+    total_count = clients.count()
 
     page = request.query_params.get('page')
-    paginator = Paginator(clients, 1)
+    paginator = Paginator(clients, 10)
 
     try:
         clients = paginator.page(page)
@@ -244,24 +246,35 @@ def getclients(request):
     except EmptyPage:
         clients = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
     
     serializer = ClientSerializer(clients, many=True)
-    return Response({'clients': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    # Include the total count in the JSON response
+    response_data = {
+        'clients': serializer.data,
+        'count': total_count,
+        'page': page,
+        'pages': paginator.num_pages
+    }
+
+    return Response(response_data)
 
 @api_view(['GET'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
 def getinterests(request):
     query = request.query_params.get('keyword')
     
-    if query == None:
+    if query is None:
         query = ''
 
-    interests = Interest.objects.filter(
-        client__name__icontains=query).order_by('-id')
+    interests = Interest.objects.filter(client__name__icontains=query).order_by('-id')
+
+    # Get the total count before pagination
+    total_count = interests.count()
 
     page = request.query_params.get('page')
     paginator = Paginator(interests, 10)
@@ -273,19 +286,28 @@ def getinterests(request):
     except EmptyPage:
         interests = paginator.page(paginator.num_pages)
 
-    if page == None:
+    if page is None:
         page = 1
 
     page = int(page)
     
     serializer = InterestSerializer(interests, many=True)
-    return JsonResponse({'interests': serializer.data, 'page': page, 'pages': paginator.num_pages})
+
+    # Include the total count in the JSON response
+    response_data = {
+        'interests': serializer.data,
+        'count': total_count,
+        'page': page,
+        'pages': paginator.num_pages
+    }
+
+    return JsonResponse(response_data)
 
 class DistinctCityAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        distinct_cities = Client.objects.values('city').distinct()
-        serializer = DistinctCitySerializer(distinct_cities, many=True)
-        return Response(serializer.data)
+        distinct_cities = Client.objects.values_list('city', flat=True).distinct()
+        city_list = list(distinct_cities)
+        return Response(city_list)
 
 # @api_view(['POST'])
 # def export_file(request, file_type):

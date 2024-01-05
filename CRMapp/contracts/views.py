@@ -22,55 +22,54 @@ from django.core.exceptions import ObjectDoesNotExist
 
 @api_view(['POST','GET','PUT','DELETE'])
 @permission_classes([IsManager | IsManagerMaint | IsEmp])
-def contract(request,pk=None):
-    if request.method == 'POST' :
-        data=request.data
+def contract(request, pk=None):
+    if request.method == 'POST':
+        data = request.data
 
-        
+        interest_id = data.get('interest_id', None)
+        ats = data.get('ats', "")
 
-        ats=data['ats']
-        interest_id=data['interest_id']
-        contract_exists = Contract.objects.filter(ats=ats).exists()
-        if not contract_exists:
+        def create_contract():
+            interest = get_object_or_404(Interest, id=interest_id)
 
-            interest=get_object_or_404(Interest, id=interest_id)
+            lift_type = data.get('lift_type', "")
+            size = data.get('size', None)
+            floors = data.get('floors', None)
+            location = data.get('location', "")
+            signed = data.get('signed', "")
+            sales_name = data.get('sales_name', "")
 
-
-            lift_type=data['lift_type']
-
-            size=data['size']
-
-            floors=data['floors']
-
-            location=data['location']
-
-            signed=data['signed']
-
-            try:
+            if location != "":
+                try:
                     url_validator(location)
-            except:
+                except:
                     message = {'detail': 'Invalid URL format for location'}
                     return Response(message, status=status.HTTP_400_BAD_REQUEST)
-            new_conrtract=Contract.objects.create(
-                                        ats=ats,
-                                        interest=interest,
-                                        lift_type=lift_type,
-                                        size=size,
-                                        floors=floors,
-                                        location=location,
-                                        signed=signed )
-            
-           
-            
+
+            new_contract = Contract.objects.create(
+                ats=ats,
+                interest=interest,
+                lift_type=lift_type,
+                size=size,
+                floors=floors,
+                location=location,
+                sales_name=sales_name,
+                signed=signed
+            )
+
             message = {'detail': 'Contract added successfully'}
             return Response(message)
-            
 
+        if ats != "":
+            # اختبار وجود العقد باستخدام ats
+            contract_exists = Contract.objects.filter(ats=ats).exists()
+            if not contract_exists:
+                return create_contract()
+            else:
+                message = {'detail': 'Contract with this Ats already exists'}
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
         else:
-            message = {'detail': 'Contract with this Ats already exists'}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
-
-
+            return create_contract()
     if request.method == 'GET' :
         if pk is not None:
           
@@ -101,9 +100,18 @@ def contract(request,pk=None):
         contract.floors = data.get('floors', contract.floors)
         location = data.get('location', contract.location)
         contract.signed = data.get('signed', contract.signed)
-        if not url_validator(location):
-            message = {'detail': 'Invalid URL format for location'}
-            return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        contract.sales_name = data.get('sales_name', contract.sales_name)
+
+        if location != "":
+            try:
+                url_validator(location)
+            except:
+                message = {'detail': 'Invalid URL format for location'}
+                return Response(message, status=status.HTTP_400_BAD_REQUEST)
+        
+        # if not url_validator(location):
+        #     message = {'detail': 'Invalid URL format for location'}
+        #     return Response(message, status=status.HTTP_400_BAD_REQUEST)
 
         contract.location = location
 
@@ -211,7 +219,7 @@ def client_info_by_contract_by_id(request,pk):
 class DistinctFloorAPIView(APIView):
     def get(self, request, *args, **kwargs):
         distinct_floors = Contract.objects.values_list('floors', flat=True).distinct()
-        floor_list = [int(floor) for floor in list(distinct_floors)]
+        floor_list = list(distinct_floors)
         return Response(floor_list)
     
 class DistinctLiftTypeAPIView(APIView):
@@ -443,26 +451,13 @@ def getphases(request):
 
     return Response(response_data)
 
-@api_view(['PUT'])
-@permission_classes([IsManager | IsManagerMaint | IsEmp])
-def end_phase(request,pk):
-    
-    Phase.objects.filter(id=pk).update(isActive=False,end_date=timezone.now())
-    message = {'detail': 'phase ended successfully'}
-    return Response(message)
-
-
-
-
-
-
         
-@csrf_exempt  # Use this decorator to exempt CSRF protection for simplicity. Consider enabling CSRF in production.
+@api_view(['POST']) 
 def export_data_to_excel(request):
-    if request.method == 'POST':
+  
         try:
             # Assuming you send the contract IDs as a list in the request body
-            contract_ids = request.POST.getlist('contract_ids[]')
+            contract_ids = request.data['contract_ids']
 
             # Retrieve the contracts based on the provided IDs
             queryset = Contract.objects.filter(id__in=contract_ids)
@@ -554,4 +549,4 @@ def export_data_to_excel(request):
         except ObjectDoesNotExist:
             return JsonResponse({'error': 'One or more contracts do not exist.'}, status=400)
 
-    return JsonResponse({'error': 'Invalid request method.'}, status=400)
+ 

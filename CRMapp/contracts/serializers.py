@@ -58,6 +58,7 @@ class ContractSerializer(serializers.ModelSerializer):
                 'floors',
                 'location',
                 'signed',
+                'sales_name',
                 'notes',
                 'current_phase',
                 'villa_no',
@@ -116,6 +117,7 @@ class ContractMobileSerializer(serializers.ModelSerializer):
                 'floors',
                 'location',
                 'signed',
+                
                 'notes',
                 'current_phase',
                 'villa_no',

@@ -21,7 +21,7 @@ class Client(models.Model):
     mobile_phone=models.CharField(validators=[phone_regex], max_length=17)
     arabic_name=models.CharField("Arabic Name of Client", max_length=64)
     city=models.CharField("city", max_length=64)
-    # notes=models.TextField(blank=True)
+    notes=models.TextField(blank=True)
     date=models.DateField("Date of client register",blank=True,null=True)
     
     def __str__(self):
@@ -47,12 +47,12 @@ class Reminder(models.Model):
 class Contract(models.Model):
     interest=models.ForeignKey(Interest,unique=False , on_delete=models.CASCADE)
     
-    ats=models.CharField("ATS", max_length=64)
-    floors=models.CharField("floors", max_length=64,blank=True)
-    lift_type=models.CharField("Type", max_length=64,blank=True)
-    location=models.URLField('Location',blank=True)
-    size=models.IntegerField("Size",blank=True)
-    # sales_name=models.CharField("sales_name", max_length=64,blank=True)
+    ats=models.CharField("ATS", max_length=64,null=True)
+    floors=models.CharField("floors", max_length=64,blank=True,null=True)
+    lift_type=models.CharField("Type", max_length=64,blank=True,null=True)
+    location=models.URLField('Location',blank=True,null=True)
+    size=models.IntegerField("Size",blank=True,null=True)
+    sales_name=models.CharField("sales_name", max_length=64,blank=True,null=True)
     signed=models.BooleanField("Signed",default=False)
 
     # def __str__(self):
@@ -74,8 +74,8 @@ class MaintenanceLift(models.Model):
     free_maintenance_expiry_date=models.DateField("free maintenance expiry date")
 
 
-    def __str__(self):
-        return str(self.maintenance_contract_number ) 
+    # def __str__(self):
+    #     return str(self.maintenance_contract_number ) 
 
 
 class Phase(models.Model):

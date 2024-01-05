@@ -64,6 +64,7 @@ class ClientSerializer(serializers.ModelSerializer):
                 'date',
                 'interest',
                 'reminder',
+                'notes',
                   
         ]
     def get_interest(self, obj):

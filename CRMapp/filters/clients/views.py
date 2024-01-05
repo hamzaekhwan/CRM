@@ -32,12 +32,12 @@ class ClientListView(generics.ListAPIView):
         total_count = queryset.count()
         
         page = request.query_params.get('page')
-        paginator = Paginator(queryset, 1)
+        paginator = Paginator(queryset, 10)
 
         try:
             clients = paginator.page(page)
         except PageNotAnInteger:
-            clients = paginator.page(10)
+            clients = paginator.page(1)
         except EmptyPage:
             clients = paginator.page(paginator.num_pages)
 

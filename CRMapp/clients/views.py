@@ -33,11 +33,12 @@ def client(request,pk=None):
             # inquiry=data['inquiry']
             date=data['date']
             company_name=data['company_name']
+            notes=data['notes']
             client=Client.objects.create(name=name,
                                 mobile_phone=mobile_phone,
                                 arabic_name=arabic_name,
                                 city=city,
-      
+                                notes=notes,
                                 date=date )
             
             
@@ -83,12 +84,13 @@ def client(request,pk=None):
 
         arabic_name = data.get('arabic_name', client.arabic_name)
         city = data.get('city', client.city)
-
+        notes=data.get('notes', client.notes)
         client.name = name
         
         client.mobile_phone = mobile_phone
         client.arabic_name = arabic_name
         client.city = city
+        client.notes = notes
 
         client.save()
 

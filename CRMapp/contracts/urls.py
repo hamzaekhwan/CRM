@@ -32,8 +32,6 @@ urlpatterns = [
     path('phase/', views.phase, name='phase'),    
     path('phase/<str:pk>/', views.phase, name='phase_by_id'),  
     path('getphases/', views.getphases, name='getphases pagination'), 
-
-    path('end_phase/<str:pk>/', views.end_phase, name='end_phase'),   
     
 
 

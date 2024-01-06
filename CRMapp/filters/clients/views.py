@@ -8,6 +8,14 @@ from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django_filters import FilterSet, DateFromToRangeFilter
+
+class ClientFilter(FilterSet):
+    date = DateFromToRangeFilter()
+
+    class Meta:
+        model = Client
+        fields =['city','date',]
 
 class ClientListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint | IsEmp]
@@ -15,8 +23,9 @@ class ClientListView(generics.ListAPIView):
     serializer_class = ClientSerializer
     
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = ClientFilter
 
-    filterset_fields = ['city']
+    # filterset_fields = ['city']
  
     search_fields = ['name', 'arabic_name', 'city', 'mobile_phone']
     

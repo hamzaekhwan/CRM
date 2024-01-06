@@ -15,13 +15,23 @@ def maintenancelift(request,pk=None):
         
         
         contract = get_object_or_404(Contract, id=pk)
+        if contract.interest.company_name != "ATLAS" : 
+            message = {'detail': 'Maintenance Lift is only for Atlas '}
+            return Response(message,status=status.HTTP_400_BAD_REQUEST)
+            
         maintenance_contract_number=data['maintenance_contract_number']
         maintenance_contract_start_date=data['maintenance_contract_start_date']
         maintenance_contract_end_date=data['maintenance_contract_end_date']
 
         maintenance_type=data['maintenance_type']
+        if maintenance_type not in dict(MAINTAINCANCE_CHOICES).keys():
+            message = {'detail': 'you should select Maintenance Type '}
+            return Response(message,status=status.HTTP_400_BAD_REQUEST)
         contract_value=data['contract_value']
         spare_parts=data['spare_parts']
+        if spare_parts not in dict(SPARE_PARTS).keys():
+            message = {'detail': 'you should select Spare parts '}
+            return Response(message,status=status.HTTP_400_BAD_REQUEST)
         brand=data['brand']
       
         villa_no=data['villa_no']
@@ -60,23 +70,35 @@ def maintenancelift(request,pk=None):
         query.delete()
         message = {'detail': 'MaintenanceLift deleted successfully'}
         return Response(message) 
-    if request.method == 'PUT' :
+    if request.method == 'PUT':
         maint_obj = get_object_or_404(MaintenanceLift, id=pk)
         data = request.data
 
-        
-        maint_obj.maintenance_contract_number = data.get('maintenance_contract_number', maint_obj.maintenance_contract_number)
-        maint_obj.maintenance_contract_start_date = data.get('maintenance_contract_start_date', maint_obj.maintenance_contract_start_date)
-        maint_obj.maintenance_contract_end_date = data.get('maintenance_contract_end_date', maint_obj.maintenance_contract_end_date)
-        maint_obj.maintenance_type = data.get('maintenance_type', maint_obj.maintenance_type)
-        maint_obj.contract_value = data.get('contract_value', maint_obj.contract_value)
-        maint_obj.spare_parts = data.get('spare_parts', maint_obj.spare_parts)
-        maint_obj.brand = data.get('brand', maint_obj.brand)
-        maint_obj.villa_no = data.get('villa_no', maint_obj.villa_no)
-        maint_obj.handing_over_date = data.get('handing_over_date', maint_obj.handing_over_date)
-        maint_obj.number_of_visits_per_year = data.get('number_of_visits_per_year', maint_obj.number_of_visits_per_year)
-        maint_obj.free_maintenance_expiry_date = data.get('free_maintenance_expiry_date', maint_obj.free_maintenance_expiry_date)
-        
+        # Conditions for PUT request data validation
+        fields_to_update = [
+            'maintenance_contract_number',
+            'maintenance_contract_start_date',
+            'maintenance_contract_end_date',
+            'maintenance_type',
+            'contract_value',
+            'spare_parts',
+            'brand',
+            'villa_no',
+            'handing_over_date',
+            'number_of_visits_per_year',
+            'free_maintenance_expiry_date',
+        ]
+
+        for field in fields_to_update:
+            setattr(maint_obj, field, data.get(field, getattr(maint_obj, field)))
+
+        # Validate maintenance_type
+        if maint_obj.maintenance_type not in dict(MAINTAINCANCE_CHOICES).keys():
+            return Response({'detail': 'Invalid maintenance type. Please provide a valid maintenance type.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Validate spare_parts
+        if maint_obj.spare_parts not in dict(SPARE_PARTS).keys():
+            return Response({'detail': 'Invalid spare parts. Please provide a valid spare parts value.'}, status=status.HTTP_400_BAD_REQUEST)
 
         maint_obj.save()
 

@@ -30,7 +30,7 @@ class Client(models.Model):
 
 class Interest(models.Model):
     client=models.ForeignKey(Client,unique=False , on_delete=models.CASCADE)
-    inquiry=models.BooleanField("INQUIRY",default=True)
+ 
     company_name=models.CharField("Name Of Company",choices=COMPANY_NAME, max_length=255)
 
     def __str__(self):

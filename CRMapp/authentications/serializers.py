@@ -16,12 +16,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField(read_only=True)
-   
+    company_name= serializers.SerializerMethodField(read_only=True)
+    role=serializers.SerializerMethodField(read_only=True)
     isAdmin = serializers.SerializerMethodField(read_only=True)
     
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'name', 'isAdmin',]
+        fields = ['id', 'username', 'email', 'name', 'isAdmin',"company_name","role"]
 
     def get__id(self, obj):
         return obj.id
@@ -33,6 +34,26 @@ class UserSerializer(serializers.ModelSerializer):
         name = obj.first_name
 
         return name
+    
+    def get_company_name(self, obj):
+        user=obj.id
+        profile=UserProfile.objects.get(user=user)
+        company_name=profile.company_name
+        return company_name
+    
+    def get_role(self, obj):
+        user=obj.id
+        profile=UserProfile.objects.get(user=user)
+        if profile.isMaint:
+            return 'maintenance'
+        elif profile.isManager:
+            return 'manager'
+        elif profile.isMangerMaint:
+            return 'maintenance_Manager'
+        elif profile.isEmp:
+            return 'employee'
+        else:
+            return 'No Role Assigned'
     
     
     

@@ -30,6 +30,7 @@ class ContractListView(generics.ListAPIView):
         'interest__client__city',
         'interest__company_name',
         'ats',
+        'sales_name',
         'location',
     ]
     ordering_fields = [

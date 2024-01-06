@@ -72,7 +72,7 @@ def admin(request,pk=None):
         
         data=request.data
         username=data['username']
-        email=data['email']
+        email=data.get('email', "")
         password=data['password']
         
         name=data['name']

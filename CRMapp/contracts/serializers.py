@@ -75,7 +75,7 @@ class ContractSerializer(serializers.ModelSerializer):
         contract=Contract.objects.get(id=obj.id)
         
         
-        query=Note.objects.filter(contract=contract)
+        query=Note.objects.filter(contract=contract).order_by('-id')
         serializer=NoteSerializer(query,many=True)
         return serializer.data
     

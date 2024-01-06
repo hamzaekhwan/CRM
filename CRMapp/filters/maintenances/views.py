@@ -7,6 +7,21 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from CRMapp.authentications.permissions import *
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django_filters import FilterSet, DateFromToRangeFilter
+
+class MaintenanceFilter(FilterSet):
+    date = DateFromToRangeFilter()
+
+    class Meta:
+        model = Maintenance
+        fields = ['type_name',
+                        "contract__interest__client__city",
+                        "contract__interest__company_name",
+                        "contract__floors",
+                        "contract__lift_type",
+                        'contract__signed',
+                        'date',]
+                        
 
 class MaintenanceListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint]
@@ -14,19 +29,23 @@ class MaintenanceListView(generics.ListAPIView):
     serializer_class = MaintenanceSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = MaintenanceFilter
 
-    filterset_fields = ['type_name',
-                        "contract__interest__client__city",
-                        "contract__interest__company_name",
-                        "contract__floors",
-                        "contract__lift_type",
-                        'contract__signed',]
+
+    # filterset_fields = ['type_name',
+    #                     "contract__interest__client__city",
+    #                     "contract__interest__company_name",
+    #                     "contract__floors",
+    #                     "contract__lift_type",
+    #                     'contract__signed',]
 
     search_fields = ['contract__interest__client__name',
                      'contract__interest__client__arabic_name',
                      'contract__interest__client__city',
                      'contract__interest__client__mobile_phone',
                      'contract__ats',
+                     
+                     'contract__sales_name',
                      'date']
     
     ordering_fields = [
@@ -35,6 +54,7 @@ class MaintenanceListView(generics.ListAPIView):
         'contract__interest__company_name',
         'contract__floors',
         'contract__lift_type',
+        'id',
         'date',
     ]
 

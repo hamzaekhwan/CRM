@@ -7,6 +7,30 @@ from rest_framework.filters import SearchFilter , OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from django.http import JsonResponse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django_filters import FilterSet, DateFromToRangeFilter
+
+class MaintenanceLiftFilter(FilterSet):
+    maintenance_contract_start_date = DateFromToRangeFilter()
+    maintenance_contract_end_date = DateFromToRangeFilter()
+    handing_over_date = DateFromToRangeFilter()
+    free_maintenance_expiry_date=DateFromToRangeFilter()
+    class Meta:
+        model = MaintenanceLift
+        fields = [
+            'maintenance_type',
+            'spare_parts',
+            'number_of_visits_per_year',
+            "contract__interest__client__city",
+            "contract__interest__company_name",
+            "contract__floors",
+            "contract__lift_type",
+            'contract__signed',
+            'maintenance_contract_start_date',
+            'maintenance_contract_end_date',
+            'handing_over_date',
+            'free_maintenance_expiry_date'
+            # ... add other fields here if needed ...
+        ]
 
 class MaintenanceLiftListView(generics.ListAPIView):
     permission_classes = [IsManager | IsManagerMaint]
@@ -14,21 +38,14 @@ class MaintenanceLiftListView(generics.ListAPIView):
     serializer_class = MaintenanceLiftSerializer
 
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_class = MaintenanceLiftFilter
 
-    filterset_fields = [
-        'maintenance_type',
-        'spare_parts',
-        'number_of_visits_per_year',
-        "contract__interest__client__city",
-        "contract__interest__company_name",
-        "contract__floors",
-        "contract__lift_type",
-        'contract__signed',
-    ]
+
 
     search_fields = [
         'contract__ats',
         'contract__lift_type',
+        'contract__sales_name',
         'maintenance_contract_number',
         'brand',
         'villa_no',
@@ -39,6 +56,7 @@ class MaintenanceLiftListView(generics.ListAPIView):
         'maintenance_contract_number',
         'brand',
         'number_of_visits_per_year',
+        'contract__ats',
         'contract__interest__client__city',
         'contract__interest__company_name',
         'contract__floors',
@@ -50,6 +68,8 @@ class MaintenanceLiftListView(generics.ListAPIView):
         'villa_no',
         'maintenance_contract_start_date',
     ]
+    
+    
 
     def get(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
